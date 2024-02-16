@@ -16,8 +16,8 @@ public static class NetworkMethods
             throw new ArgumentException($"Failed to find interface index and metric for {vpnIp}");
         }
 
-        AddRoute(IPNetwork.Parse("0.0.0.0/128.0.0.0"), index, metric);
-        AddRoute(IPNetwork.Parse("128.0.0.0/128.0.0.0"), index, metric);
+        AddRoute(IPNetwork2.Parse("0.0.0.0/128.0.0.0"), index, metric);
+        AddRoute(IPNetwork2.Parse("128.0.0.0/128.0.0.0"), index, metric);
     }
 
     public static void RemoveSplitTunnelRoutes(IPAddress vpnIp)
@@ -28,12 +28,12 @@ public static class NetworkMethods
             throw new ArgumentException($"Failed to find interface index and metric for {vpnIp}");
         }
 
-        DeleteRoute(IPNetwork.Parse("128.0.0.0/128.0.0.0"), index);
-        DeleteRoute(IPNetwork.Parse("0.0.0.0/128.0.0.0"), index);
+        DeleteRoute(IPNetwork2.Parse("128.0.0.0/128.0.0.0"), index);
+        DeleteRoute(IPNetwork2.Parse("0.0.0.0/128.0.0.0"), index);
     }
 
     public static void AddRoute(
-        IPNetwork network,
+        IPNetwork2 network,
         uint interfaceIndex, 
         ushort metric)
     {
@@ -46,7 +46,7 @@ public static class NetworkMethods
             NativeMethods.MIB_IPFORWARD_TYPE.MIB_IPROUTE_TYPE_DIRECT);
     }
 
-    public static void DeleteRoute(IPNetwork network, uint interfaceIndex)
+    public static void DeleteRoute(IPNetwork2 network, uint interfaceIndex)
     {
         NativeMethods.DeleteRoute(
             network.Value,

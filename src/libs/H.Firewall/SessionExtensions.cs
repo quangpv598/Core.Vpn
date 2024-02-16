@@ -264,7 +264,7 @@ public static class SessionExtensions
         Guid providerKey,
         Guid subLayerKey,
         byte weight,
-        IPNetwork network)
+        IPNetwork2 network)
     {
         network = network ?? throw new ArgumentNullException(nameof(network));
 
@@ -276,7 +276,7 @@ public static class SessionExtensions
         Guid providerKey,
         Guid subLayerKey,
         byte weight,
-        IPNetwork network)
+        IPNetwork2 network)
     {
         network = network ?? throw new ArgumentNullException(nameof(network));
 
@@ -288,7 +288,7 @@ public static class SessionExtensions
         Guid providerKey,
         Guid subLayerKey,
         byte weight,
-        IPNetwork network)
+        IPNetwork2 network)
     {
         network = network ?? throw new ArgumentNullException(nameof(network));
 
@@ -492,12 +492,12 @@ public static class SessionExtensions
         Guid subLayerKey,
         byte weight)
     {
-        handle.PermitRemoteSubNetworkV4(providerKey, subLayerKey, weight, IPNetwork.Parse("192.168.0.0/16"));
-        handle.PermitRemoteSubNetworkV4(providerKey, subLayerKey, weight, IPNetwork.Parse("172.16.0.0/12"));
-        handle.PermitRemoteSubNetworkV4(providerKey, subLayerKey, weight, IPNetwork.Parse("10.0.0.0/8"));
-        handle.PermitRemoteSubNetworkV4(providerKey, subLayerKey, weight, IPNetwork.Parse("224.0.0.0/4"));
-        handle.PermitRemoteSubNetworkV4(providerKey, subLayerKey, weight, IPNetwork.Parse("169.254.0.0/16"));
-        handle.PermitRemoteSubNetworkV4(providerKey, subLayerKey, weight, IPNetwork.Parse("255.255.255.255/32"));
+        handle.PermitRemoteSubNetworkV4(providerKey, subLayerKey, weight, IPNetwork2.Parse("192.168.0.0/16"));
+        handle.PermitRemoteSubNetworkV4(providerKey, subLayerKey, weight, IPNetwork2.Parse("172.16.0.0/12"));
+        handle.PermitRemoteSubNetworkV4(providerKey, subLayerKey, weight, IPNetwork2.Parse("10.0.0.0/8"));
+        handle.PermitRemoteSubNetworkV4(providerKey, subLayerKey, weight, IPNetwork2.Parse("224.0.0.0/4"));
+        handle.PermitRemoteSubNetworkV4(providerKey, subLayerKey, weight, IPNetwork2.Parse("169.254.0.0/16"));
+        handle.PermitRemoteSubNetworkV4(providerKey, subLayerKey, weight, IPNetwork2.Parse("255.255.255.255/32"));
     }
 
     public static void PermitDns(
@@ -530,7 +530,7 @@ public static class SessionExtensions
     {
         const byte cIPPROTO_IPinIP = 4;
     
-        handle.PermitLocalSubNetworkV4(providerKey, subLayerKey, weight, IPNetwork.Parse("10.0.0.0/8"));
+        handle.PermitLocalSubNetworkV4(providerKey, subLayerKey, weight, IPNetwork2.Parse("10.0.0.0/8"));
         handle.PermitProtocolV4(providerKey, subLayerKey, weight, cIPPROTO_IPinIP);
     }
 

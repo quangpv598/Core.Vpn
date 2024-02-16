@@ -328,7 +328,7 @@ public class FirewallBuilder
     /// Blocks/allows all connections to specified local sub network.
     /// </summary>
     /// <returns></returns>
-    public FirewallBuilder LocalSubNetwork(params IPNetwork[] networks)
+    public FirewallBuilder LocalSubNetwork(params IPNetwork2[] networks)
     {
         networks = networks ?? throw new ArgumentNullException(nameof(networks));
         
@@ -354,7 +354,7 @@ public class FirewallBuilder
     public FirewallBuilder LocalSubNetwork(params string[] networks)
     {
         return LocalSubNetwork(networks
-            .Select(IPNetwork.Parse)
+            .Select(IPNetwork2.Parse)
             .ToArray());
     }
     
@@ -362,7 +362,7 @@ public class FirewallBuilder
     /// Blocks/allows all connections to specified remote sub network.
     /// </summary>
     /// <returns></returns>
-    public FirewallBuilder RemoteSubNetwork(params IPNetwork[] networks)
+    public FirewallBuilder RemoteSubNetwork(params IPNetwork2[] networks)
     {
         networks = networks ?? throw new ArgumentNullException(nameof(networks));
         
@@ -388,7 +388,7 @@ public class FirewallBuilder
     public FirewallBuilder RemoteSubNetwork(params string[] networks)
     {
         return RemoteSubNetwork(networks
-            .Select(IPNetwork.Parse)
+            .Select(IPNetwork2.Parse)
             .ToArray());
     }
     

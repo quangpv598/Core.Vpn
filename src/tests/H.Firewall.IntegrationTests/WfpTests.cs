@@ -78,7 +78,7 @@ public class WfpTests
             .Block()
             .Application(@"C:\Program Files\Google\Chrome\Application\chrome.exe")
             .Allow()
-            .RemoteSubNetwork(IPNetwork.Parse("216.0.0.0/8"))
+            .RemoteSubNetwork(IPNetwork2.Parse("216.0.0.0/8"))
             .Build();
 
         await Task.Delay(TimeSpan.FromSeconds(60));

@@ -13,7 +13,7 @@ internal sealed class Condition
     public string Path { get; set; } = string.Empty;
     public Uri Uri { get; set; } = new("http://localhost/");
     public IReadOnlyCollection<IPAddress> Addresses { get; set; } = Array.Empty<IPAddress>();
-    public IPNetwork Network { get; set; } = IPNetwork.IANA_ABLK_RESERVED1;
+    public IPNetwork2 Network { get; set; } = IPNetwork2.IANA_ABLK_RESERVED1;
     public ulong InterfaceIndex { get; set; }
     public ushort Port { get; set; }
 }
