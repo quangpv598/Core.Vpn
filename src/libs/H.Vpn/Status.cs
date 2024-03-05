@@ -1,8 +1,17 @@
 ﻿namespace H.Vpn;
 
+public enum VpnStatus
+{
+    Connecting,
+    Connected,
+    Disconnecting,
+    Disconnected,
+    Failed
+}
+
 public class ServiceStatus
 {
-    public string? Status { get; set; }
+    public VpnStatus Status { get; set; }
     public string? SubStatus { get; set; } = string.Empty;
     public bool IsReconnecting { get; set; }
     public string? LastErrorMessage { get; set; }

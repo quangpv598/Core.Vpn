@@ -17,7 +17,7 @@ public class HVpn : IDisposable
     public HOpenVpn OpenVpn { get; set; } = new HOpenVpn();
     public ServiceStatus Status { get; } = new ServiceStatus
     {
-        Status = "disconnected",
+        Status = VpnStatus.Disconnected,
     };
     public FirewallSettings FirewallSettings { get; private set; } = new();
     public string VpnIp { get; private set; } = string.Empty;
@@ -265,7 +265,7 @@ public class HVpn : IDisposable
                     case VpnState.Initialized:
                     case VpnState.Restarting:
                     case VpnState.Connecting:
-                        Status.Status = "connecting";
+                        Status.Status = VpnStatus.Connecting;
                         Status.SubStatus = subStatus;
 
                         OnStatusChanged();
@@ -274,7 +274,7 @@ public class HVpn : IDisposable
                     case VpnState.Connected:
                         await OpenVpn.SubscribeByteCountAsync().ConfigureAwait(false);
 
-                        Status.Status = "connected";
+                        Status.Status = VpnStatus.Connected;
                         Status.ConnectionStartDate = DateTime.UtcNow;
                         Status.LocalInterfaceAddress = OpenVpn.LocalInterfaceAddress;
                         Status.RemoteIpdAddress = OpenVpn.RemoteIpAddress;
@@ -286,26 +286,26 @@ public class HVpn : IDisposable
                     case VpnState.Disconnecting:
                     case VpnState.DisconnectingToReconnect:
                     case VpnState.Exiting:
-                        Status.Status = "disconnecting";
+                        Status.Status = VpnStatus.Disconnecting;
                         Status.SubStatus = subStatus;
 
                         OnStatusChanged();
                         break;
 
                     case VpnState.Inactive:
-                        Status.Status = "disconnected";
+                        Status.Status = VpnStatus.Disconnected;
 
                         OnStatusChanged();
                         break;
 
                     case VpnState.Failed:
-                        Status.Status = "failed";
+                        Status.Status = VpnStatus.Failed;
                         //Status.LastErrorCode = code;
                         //Status.LastErrorMessage = message ?? "Unexpected error";
 
                         OnStatusChanged();
 
-                        Status.Status = "disconnected";
+                        Status.Status = VpnStatus.Disconnected;
 
                         OnStatusChanged();
                         break;
@@ -319,11 +319,11 @@ public class HVpn : IDisposable
         OpenVpn.InternalStateObtained += (_, state) =>
         {
             OnLogReceived($@"OpenVPN internal state obtained: 
-Name: {state.Name},
-Description: {state.Description},
-LocalIp: {state.LocalIp},
-RemoteIp: {state.RemoteIp},
-Time: {state.Time:T}");
+                            Name: {state.Name},
+                            Description: {state.Description},
+                            LocalIp: {state.LocalIp},
+                            RemoteIp: {state.RemoteIp},
+                            Time: {state.Time:T}");
         };
         OpenVpn.BytesInCountChanged += (_, count) =>
         {
@@ -357,7 +357,10 @@ Time: {state.Time:T}");
         };
         OpenVpn.Start(config,  username,  password);
 
-        await OpenVpn.WaitAuthenticationAsync(cancellationToken).ConfigureAwait(false);
+        if (!string.IsNullOrEmpty(username) && !string.IsNullOrEmpty(password))
+        {
+            await OpenVpn.WaitAuthenticationAsync(cancellationToken).ConfigureAwait(false);
+        }
 
         await OpenVpn.SubscribeStateAsync(cancellationToken).ConfigureAwait(false);
     }

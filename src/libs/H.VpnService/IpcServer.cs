@@ -3,6 +3,7 @@ using H.Pipes;
 using H.Pipes.AccessControl;
 using Newtonsoft.Json;
 using H.VpnService.Models;
+using System.Diagnostics;
 
 #pragma warning disable CS8604 // Possible null reference argument.
 
@@ -13,7 +14,7 @@ public class IpcServer : IAsyncDisposable
 {
     #region Properties
 
-    private IPipeServer<string> PipeServer { get; } = new SingleConnectionPipeServer<string>(nameof(H.VpnService));
+    private IPipeServer<string> PipeServer { get; } = new SingleConnectionPipeServer<string>("SolarVPN");
 
     #endregion
 
@@ -136,42 +137,42 @@ public class IpcServer : IAsyncDisposable
                 OnMethodCalled(method);
                 switch (method.Method)
                 {
-                    case "startConnection":
+                    case VpnRpcMethods.StartConnection:
                         var startConnection = JsonConvert.DeserializeObject<StartConnectionMethod>(json);
                         OnStartConnectionMethodCalled(startConnection);
                         break;
 
-                    case "stopConnection":
+                    case VpnRpcMethods.StopConnection:
                         var stopConnection = JsonConvert.DeserializeObject<StopConnectionMethod>(json);
                         OnStopConnectionMethodCalled(stopConnection);
                         break;
 
-                    case "requestStatus":
+                    case VpnRpcMethods.RequestStatus:
                         var requestStatus = JsonConvert.DeserializeObject<RequestStatusMethod>(json);
                         OnRequestStatusMethodCalled(requestStatus);
                         break;
 
-                    case "requestOptions":
+                    case VpnRpcMethods.RequestOptions:
                         var requestOptions = JsonConvert.DeserializeObject<RequestOptionsMethod>(json);
                         OnRequestOptionsMethodCalled(requestOptions);
                         break;
 
-                    case "requestVersion":
+                    case VpnRpcMethods.RequestVersion:
                         var requestVersion = JsonConvert.DeserializeObject<RequestVersionMethod>(json);
                         OnRequestVersionMethodCalled(requestVersion);
                         break;
 
-                    case "changeFirewallSettings":
+                    case VpnRpcMethods.ChangeFirewallSettings:
                         var changeFirewallSettings = JsonConvert.DeserializeObject<ChangeFirewallSettingsMethod>(json);
                         OnChangeFirewallSettingsMethodCalled(changeFirewallSettings);
                         break;
 
-                    case "disableFirewall":
+                    case VpnRpcMethods.DisableFirewall:
                         var disableFirewall = JsonConvert.DeserializeObject<DisableFirewallMethod>(json);
                         OnDisableFirewallMethodCalled(disableFirewall);
                         break;
 
-                    case "signOut":
+                    case VpnRpcMethods.SignOut:
                         OnSignOutMethodCalled(method);
                         break;
                 }

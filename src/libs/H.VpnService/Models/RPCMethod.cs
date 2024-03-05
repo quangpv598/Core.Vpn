@@ -2,6 +2,19 @@
 
 namespace H.VpnService.Models
 {
+    public enum VpnRpcMethods
+    {
+        Others,
+        StartConnection,
+        StopConnection,
+        RequestStatus,
+        RequestOptions,
+        RequestVersion,
+        ChangeFirewallSettings,
+        DisableFirewall,
+        SignOut
+    }
+
     /// <summary>
     /// rpc method
     /// </summary>
@@ -11,6 +24,11 @@ namespace H.VpnService.Models
         public int Id { get; set; }
 
         [JsonProperty("method", Required = Required.Always)]
-        public string? Method { get; set; }
+        public VpnRpcMethods? Method { get; set; }
+
+        public override string ToString()
+        {
+            return JsonConvert.SerializeObject(this);
+        }
     }
 }

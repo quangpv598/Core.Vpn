@@ -2,10 +2,10 @@
 
   <Import Project="..\Directory.Build.props" />
 
-  <PropertyGroup Label="Signing">
+  <!--<PropertyGroup Label="Signing">
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>$(SolutionDir)\src\key.snk</AssemblyOriginatorKeyFile>
-  </PropertyGroup>
+  </PropertyGroup>-->
 
   <ItemGroup Label="CLSCompliant">
     <AssemblyAttribute Include="System.CLSCompliantAttribute">

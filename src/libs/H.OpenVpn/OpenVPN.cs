@@ -159,14 +159,15 @@ public class HOpenVpn : IDisposable
         Process = Process.Start(new ProcessStartInfo(path,
             $"--config \"{ConfigPath}\" " +
             $"--management 127.0.0.1 {port} " +
-            "--verb 3 " +
-            "--management-query-passwords " +
-            "--remap-usr1 SIGTERM")
+            $"--dev-node \"SYSVPN TUN quang\" " +
+            $"--windows-driver wintun " +
+            "--verb 3 ")
         {
             UseShellExecute = false,
             RedirectStandardError = true,
             RedirectStandardInput = true,
             RedirectStandardOutput = true,
+            Verb = "runas"
         });
 
         TcpClientWrapper = new TcpClientWrapper(new TimeSpan(0, 0, 5));

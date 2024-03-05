@@ -9,9 +9,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		src\Directory.Build.props = src\Directory.Build.props
 		src\Directory.Build.targets = src\Directory.Build.targets
 		.github\workflows\dotnet.yml = .github\workflows\dotnet.yml
-		README.md = README.md
 		LICENSE = LICENSE
 		.github\workflows\pull-request.yml = .github\workflows\pull-request.yml
+		README.md = README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "libs", "libs", "{DFAEA034-20D3-46BD-A2FB-E09CB731C4D7}"
@@ -43,6 +43,12 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "H.Vpn", "src\libs\H.Vpn\H.Vpn.csproj", "{31E764E3-BBED-4727-97FC-F35CFBB2B629}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "H.VpnService", "src\libs\H.VpnService\H.VpnService.csproj", "{BD4D2285-EC4E-4B71-84DF-F5B71E6956F9}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests_pipe", "tests_pipe", "{DCDE6501-98F2-4F7C-B11E-A4100D5A9EE8}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "H.VpnServiceTestApp", "src\tests_pipe\H.VpnServiceTestApp\H.VpnServiceTestApp.csproj", "{64808B10-D6E1-42DE-BDE2-82736DFD8A07}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "H.VpnTestApp", "src\tests_pipe\H.VpnTestApp\H.VpnTestApp.csproj", "{7DC9ECF9-FB9B-49D0-B485-CD373F489A24}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -90,6 +96,14 @@ Global
 		{BD4D2285-EC4E-4B71-84DF-F5B71E6956F9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BD4D2285-EC4E-4B71-84DF-F5B71E6956F9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BD4D2285-EC4E-4B71-84DF-F5B71E6956F9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{64808B10-D6E1-42DE-BDE2-82736DFD8A07}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{64808B10-D6E1-42DE-BDE2-82736DFD8A07}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{64808B10-D6E1-42DE-BDE2-82736DFD8A07}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{64808B10-D6E1-42DE-BDE2-82736DFD8A07}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7DC9ECF9-FB9B-49D0-B485-CD373F489A24}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7DC9ECF9-FB9B-49D0-B485-CD373F489A24}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7DC9ECF9-FB9B-49D0-B485-CD373F489A24}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7DC9ECF9-FB9B-49D0-B485-CD373F489A24}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -105,6 +119,8 @@ Global
 		{03BE92AA-15B3-4766-B5CF-0EA09C925C9F} = {C77AB22D-6ACF-4CFB-B100-54CFB74D9221}
 		{31E764E3-BBED-4727-97FC-F35CFBB2B629} = {DFAEA034-20D3-46BD-A2FB-E09CB731C4D7}
 		{BD4D2285-EC4E-4B71-84DF-F5B71E6956F9} = {DFAEA034-20D3-46BD-A2FB-E09CB731C4D7}
+		{64808B10-D6E1-42DE-BDE2-82736DFD8A07} = {DCDE6501-98F2-4F7C-B11E-A4100D5A9EE8}
+		{7DC9ECF9-FB9B-49D0-B485-CD373F489A24} = {DCDE6501-98F2-4F7C-B11E-A4100D5A9EE8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {3A24ECAC-930F-4D6F-B45E-07B16DD51C4E}
