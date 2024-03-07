@@ -13,8 +13,8 @@ namespace H.VpnService;
 public class IpcServer : IAsyncDisposable
 {
     #region Properties
-
-    private IPipeServer<string> PipeServer { get; } = new SingleConnectionPipeServer<string>("SolarVPN");
+    public static readonly string PipeName = "62de9f67-34cd-47c5-9f1b-b347089f7ff8";
+    private IPipeServer<string> PipeServer { get; } = new SingleConnectionPipeServer<string>(PipeName);
 
     #endregion
 
