@@ -325,15 +325,20 @@ public class HVpn : IDisposable
                             RemoteIp: {state.RemoteIp},
                             Time: {state.Time:T}");
         };
-        OpenVpn.BytesInCountChanged += (_, count) =>
+        //OpenVpn.BytesInCountChanged += (_, count) =>
+        //{
+        //    OnLogReceived($"OpenVPN BytesInCount: {count}");
+        //    OnTrafficStatsChanged((count, OpenVpn.BytesOutCount));
+        //};
+        //OpenVpn.BytesOutCountChanged += (_, count) =>
+        //{
+        //    OnLogReceived($"OpenVPN BytesOutCount: {count}");
+        //    OnTrafficStatsChanged((OpenVpn.BytesInCount, count));
+        //};
+        OpenVpn.BytesInOutCountChanged += (_, bytesInOut) =>
         {
-            OnLogReceived($"OpenVPN BytesInCount: {count}");
-            OnTrafficStatsChanged((count, OpenVpn.BytesOutCount));
-        };
-        OpenVpn.BytesOutCountChanged += (_, count) =>
-        {
-            OnLogReceived($"OpenVPN BytesOutCount: {count}");
-            OnTrafficStatsChanged((OpenVpn.BytesInCount, count));
+            OnLogReceived($"OpenVPN BytesInOutCount: {bytesInOut.BytesIn}-{bytesInOut.BytesOut}");
+            OnTrafficStatsChanged((bytesInOut.BytesIn, bytesInOut.BytesOut));
         };
         OpenVpn.LogObtained += (_, message) =>
         {

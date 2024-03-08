@@ -85,6 +85,7 @@ public class HOpenVpn : IDisposable
     public event EventHandler<State>? InternalStateObtained;
     public event EventHandler<long>? BytesInCountChanged;
     public event EventHandler<long>? BytesOutCountChanged;
+    public event EventHandler<InOutBytes>? BytesInOutCountChanged;
     public event EventHandler<string>? LogObtained;
 
     public event EventHandler<string?>? ConsoleLineReceived;
@@ -116,6 +117,11 @@ public class HOpenVpn : IDisposable
     private void OnBytesOutCountChanged(long value)
     {
         BytesOutCountChanged?.Invoke(this, value);
+    }
+
+    private void OnBytesInOutCountChanged(InOutBytes value)
+    {
+        BytesInOutCountChanged?.Invoke(this, value);
     }
 
     private void OnLogObtained(string value)
@@ -499,6 +505,7 @@ public class HOpenVpn : IDisposable
                     {
                         BytesInCount = long.Parse(nums[0], CultureInfo.InvariantCulture);
                         BytesOutCount = long.Parse(nums[1], CultureInfo.InvariantCulture);
+                        OnBytesInOutCountChanged(new InOutBytes(BytesInCount, BytesOutCount));
                     }
                     continue;
                 }
