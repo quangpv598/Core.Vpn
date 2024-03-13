@@ -232,9 +232,10 @@ public class HVpn : IDisposable
     }
 
     public async Task StartVpnAsync(
-        string? config, 
+        string? adapterName,
+        string? config,
         string? username,
-        string? password, 
+        string? password,
         CancellationToken cancellationToken = default)
     {
         OpenVpn.Dispose();
@@ -360,7 +361,7 @@ public class HVpn : IDisposable
         {
             OnLogReceived($"OpenVPN Management Sent: {message}");
         };
-        OpenVpn.Start(config,  username,  password);
+        OpenVpn.Start(adapterName, config, username, password);
 
         if (!string.IsNullOrEmpty(username) && !string.IsNullOrEmpty(password))
         {

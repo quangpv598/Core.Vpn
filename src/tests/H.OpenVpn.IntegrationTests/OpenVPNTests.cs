@@ -134,6 +134,7 @@ c401cb08c3ed2901725b0601d2b5de89
 </tls-crypt>";
     private const string Username = "a0d6ee2a-9b9f-44d1-a349-67f184b2ad32";
     private const string Password = "71k9vkc4JW";
+    private const string AdapterName = "";
 
     [TestMethod]
     public void StartTest()
@@ -148,7 +149,7 @@ c401cb08c3ed2901725b0601d2b5de89
             Console.WriteLine(message);
         };
 
-        vpn.Start(Config, Username, Password);
+        vpn.Start(AdapterName, Config, Username, Password);
     }
 
     [TestMethod]
@@ -164,7 +165,7 @@ c401cb08c3ed2901725b0601d2b5de89
             Console.WriteLine(message);
         };
 
-        vpn.Start(Config, Username, Password);
+        vpn.Start(AdapterName, Config, Username, Password);
 
         await vpn.WaitAuthenticationAsync();
         await vpn.SendSignalAsync(Signal.SIGTERM);
@@ -183,7 +184,7 @@ c401cb08c3ed2901725b0601d2b5de89
             Console.WriteLine(message);
         };
 
-        vpn.Start(Config, Username, Password);
+        vpn.Start(AdapterName, Config, Username, Password);
 
         await vpn.WaitAuthenticationAsync();
 
@@ -204,7 +205,7 @@ c401cb08c3ed2901725b0601d2b5de89
             Console.WriteLine(message);
         };
 
-        vpn.Start(Config, Username, Password);
+        vpn.Start(AdapterName, Config, Username, Password);
 
         await vpn.WaitAuthenticationAsync();
 
@@ -224,7 +225,7 @@ c401cb08c3ed2901725b0601d2b5de89
             Console.WriteLine(message);
         };
 
-        vpn.Start(Config, Username, Password);
+        vpn.Start(AdapterName, Config, Username, Password);
 
         await vpn.WaitAuthenticationAsync();
 

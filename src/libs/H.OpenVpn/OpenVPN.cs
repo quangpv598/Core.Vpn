@@ -153,7 +153,7 @@ public class HOpenVpn : IDisposable
 
     #region Methods
 
-    public void Start(string? config, string? username, string? password)
+    public void Start(string? adapterName, string? config, string? username, string? password)
     {
         ConfigPath = Path.GetTempFileName();
         File.WriteAllText(ConfigPath, config);
@@ -165,7 +165,7 @@ public class HOpenVpn : IDisposable
         Process = Process.Start(new ProcessStartInfo(path,
             $"--config \"{ConfigPath}\" " +
             $"--management 127.0.0.1 {port} " +
-            $"--dev-node \"SYSVPN TUN quang\" " +
+            $"--dev-node \"{adapterName}\" " +
             $"--windows-driver wintun " +
             "--verb 3 ")
         {
@@ -542,6 +542,14 @@ public class HOpenVpn : IDisposable
                     }
 
                     OnInternalStateObtained(state);
+                    continue;
+                }
+
+                if (line.StartsWith(">FATAL:", StringComparison.Ordinal))
+                {
+                    // string without prefix ">FATAL:"
+                    VpnState = VpnState.Failed;
+                    OnLogObtained(line.Substring(5));
                     continue;
                 }
 

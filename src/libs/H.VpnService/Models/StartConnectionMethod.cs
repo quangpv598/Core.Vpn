@@ -18,5 +18,8 @@ namespace H.VpnService.Models
 
         [JsonProperty("ovpn", Required = Required.Always)]
         public string? OVpn { get; set; }
+
+        [JsonProperty("adapter", Required = Required.Always)]
+        public string? AdapterName { get; set; }
     }
 }

@@ -74,7 +74,7 @@ namespace H.VpnService
         public async Task StartAsync(CancellationToken cancellationToken = default)
         {
             OnLogReceived("Starting...");
-   
+
             IpcServer.ExceptionOccurred += (_, exception) => OnExceptionOccurred(exception);
             IpcServer.ClientConnected += (_, args) => OnLogReceived("IPC client connected");
             IpcServer.ClientDisconnected += (_, args) => OnLogReceived("IPC client disconnected");
@@ -86,7 +86,7 @@ namespace H.VpnService
             {
                 try
                 {
-                    await Vpn.StartVpnAsync(method.OVpn, method.Username, method.Password).ConfigureAwait(false);
+                    await Vpn.StartVpnAsync(method.AdapterName, method.OVpn, method.Username, method.Password).ConfigureAwait(false);
                 }
                 catch (Exception exception)
                 {
@@ -124,7 +124,7 @@ namespace H.VpnService
                 try
                 {
                     await IpcServer.SendOptionsAsync(
-                        method.Id, 
+                        method.Id,
                         Vpn.FirewallSettings.AllowLan,
                         Vpn.FirewallSettings.EnableKillSwitch).ConfigureAwait(false);
                 }
