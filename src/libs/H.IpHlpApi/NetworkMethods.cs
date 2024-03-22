@@ -98,11 +98,11 @@ public static class NetworkMethods
         return new Tuple<uint, ushort>(index, metric);
     }
 
-    public static ulong FindTapAdapterLuid()
+    public static ulong FindTapAdapterLuid(string adapterDescription)
     {
         return ConvertInterfaceIndexToLuid(
             NativeMethods.GetAdapters(NativeMethods.FAMILY.AF_UNSPEC)
-                .FirstOrDefault(adapter => adapter.Description == "TAP-Windows Adapter V9")?
+                .FirstOrDefault(adapter => adapter.Description == adapterDescription)?
                 .InterfaceIndex
             ?? throw new InvalidOperationException("No available TAP adapters found"));
     }

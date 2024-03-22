@@ -173,12 +173,7 @@ public class HVpn : IDisposable
                 // OpenVPN.exe
                 handle.AddAppId(ActionType.Permit, providerKey, subLayerKey, GetOpenVpnPath(), 14);
 
-                // H.Wfp.exe
-#if DEBUG
-                handle.AddAppId(ActionType.Permit, providerKey, subLayerKey, @"C:\Program Files\H.Wfp\H.Wfp.exe", 13);
-#else
-                handle.AddAppId(ActionType.Permit, providerKey, subLayerKey, GetGuiProcessPath(), 13);
-#endif
+                handle.AddAppId(ActionType.Permit, providerKey, subLayerKey, settings.GuiProcessPath, 13);
 
                 if (settings.AllowLan)
                 {
@@ -188,7 +183,7 @@ public class HVpn : IDisposable
                 handle.PermitDns(providerKey, subLayerKey, 11, 10, settings.PrimaryDns, settings.SecondaryDns);
                 handle.PermitIKEv2(providerKey, subLayerKey, 9);
                 // Permit Tap Adapter
-                handle.PermitNetworkInterface(providerKey, subLayerKey, 2, NetworkMethods.FindTapAdapterLuid());
+                handle.PermitNetworkInterface(providerKey, subLayerKey, 2, NetworkMethods.FindTapAdapterLuid(settings.AdapterTunDescription));
                 handle.PermitLocalhost(providerKey, subLayerKey, 1);
 
                 // Block everything not allowed explicitly

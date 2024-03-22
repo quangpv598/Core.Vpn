@@ -12,6 +12,8 @@ public class FirewallSettings
     public SplitTunnelingMode SplitTunnelingMode { get; set; } = SplitTunnelingMode.Off;
     public IReadOnlyCollection<string> SplitTunnelingApps { get; set; } = Array.Empty<string>();
     public string LocalIp { get; set; } = string.Empty;
+    public string GuiProcessPath { get; set; } = string.Empty;
+    public string AdapterTunDescription { get; set; } = string.Empty;
 
     #endregion
 

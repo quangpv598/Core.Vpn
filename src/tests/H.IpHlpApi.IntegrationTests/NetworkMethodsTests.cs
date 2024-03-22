@@ -19,6 +19,6 @@ public class NetworkMethodsTests
     [TestMethod]
     public void FindTapAdapterLuidTest()
     {
-        Console.WriteLine($"TapAdapterLuid: {NetworkMethods.FindTapAdapterLuid()}");
+        Console.WriteLine($"TapAdapterLuid: {NetworkMethods.FindTapAdapterLuid("SolarVPN TUN Tunnel")}");
     }
 }

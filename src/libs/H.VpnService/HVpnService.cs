@@ -158,6 +158,8 @@ namespace H.VpnService
                         SecondaryDns = method.SecondaryDns ?? string.Empty,
                         SplitTunnelingApps = method.SplitTunnelingApps ?? new List<string>(),
                         SplitTunnelingMode = method.SplitTunnelingMode,
+                        GuiProcessPath = method.GuiProcessPath ?? string.Empty,
+                        AdapterTunDescription = method.AdapterTunDescription ?? string.Empty,
                     }, method.VpnIp ?? string.Empty);
                 }
                 catch (Exception exception)
