@@ -256,6 +256,13 @@ public class HVpn : IDisposable
                 var subStatus = $"{state:G}".ToLowerInvariant();
                 switch (state)
                 {
+                    case VpnState.Reconnecting:
+                        Status.Status = VpnStatus.Reconnecting;
+                        Status.SubStatus = subStatus;
+
+                        OnStatusChanged();
+                        break;
+
                     case VpnState.Preparing:
                     case VpnState.Started:
                     case VpnState.Initialized:

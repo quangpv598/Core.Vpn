@@ -7,6 +7,7 @@ public enum VpnState
     Started,
     Initialized,
     Connecting,
+    Reconnecting,
     Restarting,
     Connected,
     Disconnecting,

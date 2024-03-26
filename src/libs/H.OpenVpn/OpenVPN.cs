@@ -326,7 +326,7 @@ public class HOpenVpn : IDisposable
 
     public async Task SubscribeByteCountAsync(CancellationToken cancellationToken = default)
     {
-        await WriteLineToManagementAsync("bytecount 5", cancellationToken).ConfigureAwait(false);
+        await WriteLineToManagementAsync("bytecount 1", cancellationToken).ConfigureAwait(false);
     }
 
     public async Task SubscribeLogAsync(CancellationToken cancellationToken = default)
@@ -515,8 +515,13 @@ public class HOpenVpn : IDisposable
                     var state = State.Parse(line.Substring(7));
                     switch (state.Name)
                     {
+                        case "RECONNECTING":
                         case "WAIT":
                             VpnState = VpnState.Connecting;
+                            break;
+
+                        case "TCP_CONNECT":
+                            VpnState = VpnState.Reconnecting;
                             break;
 
                         case "RESOLVE":

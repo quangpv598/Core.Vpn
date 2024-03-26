@@ -4,6 +4,7 @@ public enum VpnStatus
 {
     Connecting,
     Connected,
+    Reconnecting,
     Disconnecting,
     Disconnected,
     Failed
