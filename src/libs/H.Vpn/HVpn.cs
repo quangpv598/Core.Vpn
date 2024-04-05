@@ -14,7 +14,7 @@ public class HVpn : IDisposable
     #region Properties
 
     public HFirewall Firewall { get; } = new HFirewall();
-    public HOpenVpn OpenVpn { get; set; } = new HOpenVpn();
+    public BaseVPN CurrentVpnInstance { get; set; }
     public ServiceStatus Status { get; } = new ServiceStatus
     {
         Status = VpnStatus.Disconnected,
@@ -150,16 +150,6 @@ public class HVpn : IDisposable
         return Path.GetDirectoryName(GetServiceProcessPath()) ?? string.Empty;
     }
 
-    public static string GetOpenVpnPath()
-    {
-        return Path.Combine(GetServiceProcessDirectory(), "OpenVPN", "openvpn.exe");
-    }
-
-    public static string GetGuiProcessPath()
-    {
-        return Path.Combine(Path.GetDirectoryName(GetServiceProcessDirectory()) ?? string.Empty, "H.Wfp.exe");
-    }
-
     public void StartFirewall(FirewallSettings settings, string vpnIp)
     {
         Firewall.Start();
@@ -170,10 +160,14 @@ public class HVpn : IDisposable
             {
                 // H.Wfp-Service.exe
                 handle.AddAppId(ActionType.Permit, providerKey, subLayerKey, GetServiceProcessPath(), 15);
-                // OpenVPN.exe
-                handle.AddAppId(ActionType.Permit, providerKey, subLayerKey, GetOpenVpnPath(), 14);
 
-                handle.AddAppId(ActionType.Permit, providerKey, subLayerKey, settings.GuiProcessPath, 13);
+                //Permit app
+                byte weight = 0;
+                foreach (string path in settings.PermitAppPath)
+                {
+                    handle.AddAppId(ActionType.Permit, providerKey, subLayerKey, path, weight);
+                    weight++;
+                }
 
                 if (settings.AllowLan)
                 {
@@ -226,17 +220,21 @@ public class HVpn : IDisposable
         FirewallSettings.AllowLan = false;
     }
 
-    public async Task StartVpnAsync(
-        string? adapterName,
-        string? config,
-        string? username,
-        string? password,
+    public async Task StartVpnAsync(VPNConnectionInfo connectionInfo,
         CancellationToken cancellationToken = default)
     {
-        OpenVpn.Dispose();
-        OpenVpn = new HOpenVpn();
-        OpenVpn.ExceptionOccurred += (_, exception) => OnExceptionOccurred(exception);
-        OpenVpn.StateChanged += async (_, state) =>
+        if (connectionInfo == null)
+        {
+            return;
+        }
+        if (CurrentVpnInstance != null)
+        {
+            CurrentVpnInstance.Dispose();
+        }
+
+        CurrentVpnInstance = connectionInfo.Type == LibVpnType.Wireguard ? new WireguardVPN() : new HOpenVpn();
+        CurrentVpnInstance.ExceptionOccurred += (_, exception) => OnExceptionOccurred(exception);
+        CurrentVpnInstance.StateChanged += async (_, state) =>
         {
             try
             {
@@ -275,13 +273,17 @@ public class HVpn : IDisposable
                         break;
 
                     case VpnState.Connected:
-                        await OpenVpn.SubscribeByteCountAsync().ConfigureAwait(false);
+
+                        if (CurrentVpnInstance is HOpenVpn instance)
+                        {
+                            await instance.SubscribeByteCountAsync().ConfigureAwait(false);
+                        }
 
                         Status.Status = VpnStatus.Connected;
                         Status.ConnectionStartDate = DateTime.UtcNow;
-                        Status.LocalInterfaceAddress = OpenVpn.LocalInterfaceAddress;
-                        Status.RemoteIpdAddress = OpenVpn.RemoteIpAddress;
-                        Status.RemoteIpPort = OpenVpn.RemoteIpPort;
+                        Status.LocalInterfaceAddress = CurrentVpnInstance.LocalInterfaceAddress;
+                        Status.RemoteIpdAddress = CurrentVpnInstance.RemoteIpAddress;
+                        Status.RemoteIpPort = CurrentVpnInstance.RemoteIpPort;
 
                         OnStatusChanged();
                         break;
@@ -319,7 +321,7 @@ public class HVpn : IDisposable
                 OnExceptionOccurred(exception);
             }
         };
-        OpenVpn.InternalStateObtained += (_, state) =>
+        CurrentVpnInstance.InternalStateObtained += (_, state) =>
         {
             OnLogReceived($@"OpenVPN internal state obtained: 
                             Name: {state.Name},
@@ -328,71 +330,79 @@ public class HVpn : IDisposable
                             RemoteIp: {state.RemoteIp},
                             Time: {state.Time:T}");
         };
-        //OpenVpn.BytesInCountChanged += (_, count) =>
-        //{
-        //    OnLogReceived($"OpenVPN BytesInCount: {count}");
-        //    OnTrafficStatsChanged((count, OpenVpn.BytesOutCount));
-        //};
-        //OpenVpn.BytesOutCountChanged += (_, count) =>
-        //{
-        //    OnLogReceived($"OpenVPN BytesOutCount: {count}");
-        //    OnTrafficStatsChanged((OpenVpn.BytesInCount, count));
-        //};
-        OpenVpn.BytesInOutCountChanged += (_, bytesInOut) =>
+        CurrentVpnInstance.BytesInOutCountChanged += (_, bytesInOut) =>
         {
             OnLogReceived($"OpenVPN BytesInOutCount: {bytesInOut.BytesIn}-{bytesInOut.BytesOut}");
             OnTrafficStatsChanged((bytesInOut.BytesIn, bytesInOut.BytesOut));
         };
-        OpenVpn.LogObtained += (_, message) =>
+        CurrentVpnInstance.LogObtained += (_, message) =>
         {
             OnLogReceived($"OpenVPN Log: {message}");
         };
-        OpenVpn.ConsoleLineReceived += (_, message) =>
-        {
-            OnLogReceived($"OpenVPN Console Received: {message}");
-        };
-        OpenVpn.ManagementLineReceived += (_, message) =>
-        {
-            OnLogReceived($"OpenVPN Management Received: {message}");
-        };
-        OpenVpn.ConsoleLineSent += (_, message) =>
-        {
-            OnLogReceived($"OpenVPN Console Sent: {message}");
-        };
-        OpenVpn.ManagementLineSent += (_, message) =>
-        {
-            OnLogReceived($"OpenVPN Management Sent: {message}");
-        };
-        OpenVpn.Start(adapterName, config, username, password);
 
-        if (!string.IsNullOrEmpty(username) && !string.IsNullOrEmpty(password))
+        if (CurrentVpnInstance is HOpenVpn instance)
         {
-            await OpenVpn.WaitAuthenticationAsync(cancellationToken).ConfigureAwait(false);
+            instance.ConsoleLineReceived += (_, message) =>
+            {
+                OnLogReceived($"OpenVPN Console Received: {message}");
+            };
+            instance.ManagementLineReceived += (_, message) =>
+            {
+                OnLogReceived($"OpenVPN Management Received: {message}");
+            };
+            instance.ConsoleLineSent += (_, message) =>
+            {
+                OnLogReceived($"OpenVPN Console Sent: {message}");
+            };
+            instance.ManagementLineSent += (_, message) =>
+            {
+                OnLogReceived($"OpenVPN Management Sent: {message}");
+            };
         }
 
-        await OpenVpn.SubscribeStateAsync(cancellationToken).ConfigureAwait(false);
+        CurrentVpnInstance.StartAsync(connectionInfo);
+
+
+        if (CurrentVpnInstance is HOpenVpn openVpnInstance)
+        {
+            if (!string.IsNullOrEmpty(connectionInfo?.OpenVPNServiceInfo?.UserName) && !string.IsNullOrEmpty(connectionInfo?.OpenVPNServiceInfo?.UserName))
+            {
+                await openVpnInstance.WaitAuthenticationAsync(cancellationToken).ConfigureAwait(false);
+            }
+
+            await openVpnInstance.SubscribeStateAsync(cancellationToken).ConfigureAwait(false);
+        }
     }
 
     public async Task StopVpnAsync(CancellationToken cancellationToken = default)
     {
+        if (CurrentVpnInstance == null)
+        {
+            return;
+        }
+
         //isReconnecting = false
-        switch (OpenVpn.VpnState)
+        switch (CurrentVpnInstance.VpnState)
         {
             case VpnState.Preparing:
             case VpnState.Started:
             case VpnState.Initialized:
-                OpenVpn.VpnState = VpnState.Exiting;
+                CurrentVpnInstance.VpnState = VpnState.Exiting;
                 break;
 
             case VpnState.Connecting:
             case VpnState.Restarting:
             case VpnState.Connected:
-                OpenVpn.VpnState = VpnState.Disconnecting;
+                CurrentVpnInstance.VpnState = VpnState.Disconnecting;
 
-                await OpenVpn.SendSignalAsync(Signal.SIGTERM, cancellationToken).ConfigureAwait(false);
+                if (CurrentVpnInstance is HOpenVpn instance)
+                {
+                    await instance.SendSignalAsync(Signal.SIGTERM, cancellationToken).ConfigureAwait(false);
 
-                OpenVpn.WaitForExit(TimeSpan.FromSeconds(5));
-                OpenVpn.VpnState = VpnState.Inactive;
+                    instance.WaitForExit(TimeSpan.FromSeconds(5));
+                }
+
+                CurrentVpnInstance.VpnState = VpnState.Inactive;
                 break;
 
             // Force change event.
@@ -400,11 +410,11 @@ public class HVpn : IDisposable
             case VpnState.Exiting:
             case VpnState.Inactive:
             case VpnState.Failed:
-                OpenVpn.VpnState = OpenVpn.VpnState;
+                CurrentVpnInstance.VpnState = CurrentVpnInstance.VpnState;
                 break;
         }
 
-        OpenVpn.Dispose();
+        CurrentVpnInstance.Dispose();
     }
 
     public static Version GetVersion()
@@ -421,7 +431,11 @@ public class HVpn : IDisposable
     {
         if (disposing)
         {
-            OpenVpn.Dispose();
+            if (CurrentVpnInstance != null)
+            {
+                CurrentVpnInstance.Dispose();
+            }
+
             Firewall.Dispose();
         }
     }

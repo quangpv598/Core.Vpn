@@ -102,7 +102,7 @@ public static class NetworkMethods
     {
         return ConvertInterfaceIndexToLuid(
             NativeMethods.GetAdapters(NativeMethods.FAMILY.AF_UNSPEC)
-                .FirstOrDefault(adapter => adapter.Description == adapterDescription)?
+                .FirstOrDefault(adapter => adapter.Description == adapterDescription || adapter.Description.Contains("WireGuard Tunnel"))?
                 .InterfaceIndex
             ?? throw new InvalidOperationException("No available TAP adapters found"));
     }

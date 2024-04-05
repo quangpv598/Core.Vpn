@@ -86,7 +86,24 @@ namespace H.VpnService
             {
                 try
                 {
-                    await Vpn.StartVpnAsync(method.AdapterName, method.OVpn, method.Username, method.Password).ConfigureAwait(false);
+                    await Vpn.StartVpnAsync(new OpenVpn.VPNConnectionInfo
+                    {
+                        Type = method.VpnType,
+                        AdapterName = method.AdapterName,
+                        ConfigContent = method.ConfigContent,
+                        OpenVPNServiceInfo = new OpenVpn.OpenVPNServiceInfo
+                        {
+                            UserName = method.Username,
+                            Password = method.Password
+                        },
+                        WireguardServiceInfo = new OpenVpn.WireguardServiceInfo
+                        {
+                            ServiceName = method.ShortServiceName,
+                            ServiceDescription = method.ServiceDescription,
+                            BinaryServicePath = method.BinaryServicePath,
+                            DnsServers = method.DnsServers,
+                        }
+                    }).ConfigureAwait(false);
                 }
                 catch (Exception exception)
                 {
@@ -158,7 +175,7 @@ namespace H.VpnService
                         SecondaryDns = method.SecondaryDns ?? string.Empty,
                         SplitTunnelingApps = method.SplitTunnelingApps ?? new List<string>(),
                         SplitTunnelingMode = method.SplitTunnelingMode,
-                        GuiProcessPath = method.GuiProcessPath ?? string.Empty,
+                        PermitAppPath = method.PermitAppsPath ?? new List<string>(),
                         AdapterTunDescription = method.AdapterTunDescription ?? string.Empty,
                     }, method.VpnIp ?? string.Empty);
                 }

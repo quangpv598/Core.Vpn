@@ -8,53 +8,11 @@ using System.Threading.Channels;
 
 namespace H.OpenVpn;
 
-public class HOpenVpn : IDisposable
+public class HOpenVpn : BaseVPN
 {
-    #region Properties
-
-    private VpnState _vpnState = VpnState.Inactive;
-    public VpnState VpnState
-    {
-        get => _vpnState;
-        set
-        {
-            _vpnState = value;
-            OnStateChanged(value);
-        }
-    }
-
-    private long _bytesInCount;
-    public long BytesInCount
-    {
-        get => _bytesInCount;
-        set
-        {
-            _bytesInCount = value;
-            OnBytesInCountChanged(value);
-        }
-    }
-
-    private long _bytesOutCount;
-    public long BytesOutCount
-    {
-        get => _bytesOutCount;
-        set
-        {
-            _bytesOutCount = value;
-            OnBytesOutCountChanged(value);
-        }
-    }
-
-    public string LocalInterfaceAddress { get; set; } = string.Empty;
-    public string RemoteIpAddress { get; set; } = string.Empty;
-    public string RemoteIpPort { get; set; } = string.Empty;
-
-    #endregion
-
     #region Private properties
 
     private Process? Process { get; set; }
-    private string? ConfigPath { get; set; }
 
     #region Console
 
@@ -79,55 +37,11 @@ public class HOpenVpn : IDisposable
 
     #region Events
 
-    public event EventHandler<Exception>? ExceptionOccurred;
-
-    public event EventHandler<VpnState>? StateChanged;
-    public event EventHandler<State>? InternalStateObtained;
-    public event EventHandler<long>? BytesInCountChanged;
-    public event EventHandler<long>? BytesOutCountChanged;
-    public event EventHandler<InOutBytes>? BytesInOutCountChanged;
-    public event EventHandler<string>? LogObtained;
-
     public event EventHandler<string?>? ConsoleLineReceived;
     public event EventHandler<string?>? ManagementLineReceived;
 
     public event EventHandler<string>? ConsoleLineSent;
     public event EventHandler<string>? ManagementLineSent;
-
-    private void OnExceptionOccurred(Exception value)
-    {
-        ExceptionOccurred?.Invoke(this, value);
-    }
-
-    private void OnStateChanged(VpnState value)
-    {
-        StateChanged?.Invoke(this, value);
-    }
-
-    private void OnInternalStateObtained(State value)
-    {
-        InternalStateObtained?.Invoke(this, value);
-    }
-
-    private void OnBytesInCountChanged(long value)
-    {
-        BytesInCountChanged?.Invoke(this, value);
-    }
-
-    private void OnBytesOutCountChanged(long value)
-    {
-        BytesOutCountChanged?.Invoke(this, value);
-    }
-
-    private void OnBytesInOutCountChanged(InOutBytes value)
-    {
-        BytesInOutCountChanged?.Invoke(this, value);
-    }
-
-    private void OnLogObtained(string value)
-    {
-        LogObtained?.Invoke(this, value);
-    }
 
     private void OnConsoleLineReceived(string? value)
     {
@@ -153,13 +67,23 @@ public class HOpenVpn : IDisposable
 
     #region Methods
 
-    public void Start(string? adapterName, string? config, string? username, string? password)
+    public override async Task StartAsync(VPNConnectionInfo connectionInfo)
     {
+        if (connectionInfo?.OpenVPNServiceInfo == null)
+        {
+            throw new ArgumentNullException();
+        }
+
+        string? adapterName = connectionInfo.AdapterName;
+        string? config = connectionInfo.ConfigContent;
+        string? username = connectionInfo.OpenVPNServiceInfo.UserName;
+        string? password = connectionInfo.OpenVPNServiceInfo.Password;
+
         ConfigPath = Path.GetTempFileName();
         File.WriteAllText(ConfigPath, config);
 
         var folder = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? string.Empty;
-        var path = Path.Combine(folder, "OpenVPN",Environment.Is64BitProcess ? "lib_x64" : "lib_x86", "openvpn.exe");
+        var path = Path.Combine(folder, "OpenVPN", Environment.Is64BitProcess ? "lib_x64" : "lib_x86", "openvpn.exe");
         var port = NetworkUtilities.GetFreeTcpPort();
 
         Process = Process.Start(new ProcessStartInfo(path,
@@ -191,12 +115,7 @@ public class HOpenVpn : IDisposable
         }
     }
 
-    public void Stop()
-    {
-        Dispose();
-    }
-
-    protected virtual void Dispose(bool disposing)
+    protected override void Dispose(bool disposing)
     {
         if (disposing)
         {
@@ -234,12 +153,6 @@ public class HOpenVpn : IDisposable
                 // ignored
             }
         }
-    }
-
-    public void Dispose()
-    {
-        Dispose(true);
-        GC.SuppressFinalize(this);
     }
 
     public async Task SendSignalAsync(Signal signal, CancellationToken cancellationToken = default)

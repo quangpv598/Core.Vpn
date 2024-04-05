@@ -34,8 +34,8 @@ public class ChangeFirewallSettingsMethod : RpcMethod
     [JsonProperty("vpnIP")]
     public string? VpnIp { get; set; }
 
-    [JsonProperty("guiProcessPath", Required = Required.Always)]
-    public string GuiProcessPath { get; set; }
+    [JsonProperty("permitAppsPath", Required = Required.Always)]
+    public List<string> PermitAppsPath { get; set; }
 
     [JsonProperty("adapterTunDescription", Required = Required.Always)]
     public string AdapterTunDescription { get; set; }

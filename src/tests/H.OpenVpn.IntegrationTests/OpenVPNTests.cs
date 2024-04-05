@@ -149,7 +149,16 @@ c401cb08c3ed2901725b0601d2b5de89
             Console.WriteLine(message);
         };
 
-        vpn.Start(AdapterName, Config, Username, Password);
+        vpn.StartAsync(new VPNConnectionInfo
+        {
+            AdapterName = AdapterName,
+            ConfigContent = Config,
+            OpenVPNServiceInfo = new OpenVPNServiceInfo
+            {
+                UserName = Username,
+                Password = Password
+            }
+        });
     }
 
     [TestMethod]
@@ -165,7 +174,16 @@ c401cb08c3ed2901725b0601d2b5de89
             Console.WriteLine(message);
         };
 
-        vpn.Start(AdapterName, Config, Username, Password);
+        vpn.StartAsync(new VPNConnectionInfo
+        {
+            AdapterName = AdapterName,
+            ConfigContent = Config,
+            OpenVPNServiceInfo = new OpenVPNServiceInfo
+            {
+                UserName = Username,
+                Password = Password
+            }
+        });
 
         await vpn.WaitAuthenticationAsync();
         await vpn.SendSignalAsync(Signal.SIGTERM);
@@ -184,7 +202,16 @@ c401cb08c3ed2901725b0601d2b5de89
             Console.WriteLine(message);
         };
 
-        vpn.Start(AdapterName, Config, Username, Password);
+        vpn.StartAsync(new VPNConnectionInfo
+        {
+            AdapterName = AdapterName,
+            ConfigContent = Config,
+            OpenVPNServiceInfo = new OpenVPNServiceInfo
+            {
+                UserName = Username,
+                Password = Password
+            }
+        });
 
         await vpn.WaitAuthenticationAsync();
 
@@ -205,7 +232,16 @@ c401cb08c3ed2901725b0601d2b5de89
             Console.WriteLine(message);
         };
 
-        vpn.Start(AdapterName, Config, Username, Password);
+        vpn.StartAsync(new VPNConnectionInfo
+        {
+            AdapterName = AdapterName,
+            ConfigContent = Config,
+            OpenVPNServiceInfo = new OpenVPNServiceInfo
+            {
+                UserName = Username,
+                Password = Password
+            }
+        });
 
         await vpn.WaitAuthenticationAsync();
 
@@ -225,7 +261,16 @@ c401cb08c3ed2901725b0601d2b5de89
             Console.WriteLine(message);
         };
 
-        vpn.Start(AdapterName, Config, Username, Password);
+        vpn.StartAsync(new VPNConnectionInfo
+        {
+            AdapterName = AdapterName,
+            ConfigContent = Config,
+            OpenVPNServiceInfo = new OpenVPNServiceInfo
+            {
+                UserName = Username,
+                Password = Password
+            }
+        });
 
         await vpn.WaitAuthenticationAsync();
 

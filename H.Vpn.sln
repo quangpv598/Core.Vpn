@@ -50,6 +50,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "H.VpnServiceTestApp", "src\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "H.VpnTestApp", "src\tests_pipe\H.VpnTestApp\H.VpnTestApp.csproj", "{7DC9ECF9-FB9B-49D0-B485-CD373F489A24}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "H.WireguardService", "src\libs\H.Wireguard\H.WireguardService.csproj", "{7CCCAADD-A633-4450-A250-B7E3F385E019}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -104,6 +106,10 @@ Global
 		{7DC9ECF9-FB9B-49D0-B485-CD373F489A24}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7DC9ECF9-FB9B-49D0-B485-CD373F489A24}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7DC9ECF9-FB9B-49D0-B485-CD373F489A24}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7CCCAADD-A633-4450-A250-B7E3F385E019}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7CCCAADD-A633-4450-A250-B7E3F385E019}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7CCCAADD-A633-4450-A250-B7E3F385E019}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7CCCAADD-A633-4450-A250-B7E3F385E019}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -121,6 +127,7 @@ Global
 		{BD4D2285-EC4E-4B71-84DF-F5B71E6956F9} = {DFAEA034-20D3-46BD-A2FB-E09CB731C4D7}
 		{64808B10-D6E1-42DE-BDE2-82736DFD8A07} = {DCDE6501-98F2-4F7C-B11E-A4100D5A9EE8}
 		{7DC9ECF9-FB9B-49D0-B485-CD373F489A24} = {DCDE6501-98F2-4F7C-B11E-A4100D5A9EE8}
+		{7CCCAADD-A633-4450-A250-B7E3F385E019} = {DFAEA034-20D3-46BD-A2FB-E09CB731C4D7}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {3A24ECAC-930F-4D6F-B45E-07B16DD51C4E}

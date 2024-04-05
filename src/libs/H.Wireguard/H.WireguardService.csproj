@@ -3,12 +3,13 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net6.0-windows</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\libs\H.VpnService\H.VpnService.csproj" />
-    <ProjectReference Include="..\..\libs\H.Wireguard\H.WireguardService.csproj" />
+    <ProjectReference Include="..\H.Firewall\H.Firewall.csproj" />
   </ItemGroup>
 
 </Project>
