@@ -26,6 +26,21 @@ public class WireguardVPN : BaseVPN
 
         _connectionInfo = connectionInfo ?? throw new ArgumentNullException();
 
+        string platform = Environment.Is64BitProcess ? "x64" : "x86";
+
+        string serviceBinaryPath = Path.GetFullPath(_connectionInfo.WireguardServiceInfo.BinaryServicePath);
+        string targetTunnelPathFile = Path.Combine(serviceBinaryPath, "tunnel.dll");
+        string targetWireguardPathFile = Path.Combine(serviceBinaryPath, "wireguard.dll");
+        if (!File.Exists(targetTunnelPathFile))
+        {
+            File.Copy($"Wireguard/lib_{platform}/tunnel.dll", targetTunnelPathFile);
+        }
+
+        if (!File.Exists(targetWireguardPathFile))
+        {
+            File.Copy($"Wireguard/lib_{platform}/wireguard.dll", targetWireguardPathFile);
+        }
+
         ConfigPath = Path.Combine(Path.GetTempPath(), $"{connectionInfo.AdapterName}.conf");
         File.WriteAllText(ConfigPath, connectionInfo.ConfigContent);
 
