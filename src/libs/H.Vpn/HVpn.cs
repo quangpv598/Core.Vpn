@@ -5,6 +5,7 @@ using System.Net;
 using System.Reflection;
 using System.Runtime.Versioning;
 using H.Wfp;
+using System.Diagnostics;
 
 namespace H.Vpn;
 
@@ -136,7 +137,7 @@ public class HVpn : IDisposable
 
     public static string GetServiceProcessPath()
     {
-        var path = Assembly.GetEntryAssembly()?.Location ?? string.Empty;
+        var path = Process.GetCurrentProcess().MainModule.FileName ?? string.Empty;
         if (string.IsNullOrWhiteSpace(path))
         {
             throw new InvalidOperationException("This method only works when running exe files.");
@@ -158,9 +159,10 @@ public class HVpn : IDisposable
             var (providerKey, subLayerKey) = handle.RegisterKeys();
             if (settings.EnableKillSwitch)
             {
+#if DEBUG
                 // H.Wfp-Service.exe
                 handle.AddAppId(ActionType.Permit, providerKey, subLayerKey, GetServiceProcessPath(), 15);
-
+#endif
                 //Permit app
                 byte weight = 0;
                 foreach (string path in settings.PermitAppPath)
@@ -176,8 +178,13 @@ public class HVpn : IDisposable
 
                 handle.PermitDns(providerKey, subLayerKey, 11, 10, settings.PrimaryDns, settings.SecondaryDns);
                 handle.PermitIKEv2(providerKey, subLayerKey, 9);
+                const int DhcpUdpPort = 67;
+                handle.PermitUdpPortV4(providerKey, subLayerKey, 8, DhcpUdpPort);
                 // Permit Tap Adapter
-                handle.PermitNetworkInterface(providerKey, subLayerKey, 2, NetworkMethods.FindTapAdapterLuid(settings.AdapterTunDescription));
+                foreach (var adapter in NetworkMethods.FindTapAdapterLuid(settings.AdapterTunDescription))
+                {
+                    handle.PermitNetworkInterface(providerKey, subLayerKey, 2, adapter);
+                }
                 handle.PermitLocalhost(providerKey, subLayerKey, 1);
 
                 // Block everything not allowed explicitly
@@ -238,6 +245,13 @@ public class HVpn : IDisposable
         {
             try
             {
+                Status.IsUseMultiNode = CurrentVpnInstance.IsUseMultiNode;
+                Status.EntryCountryId = CurrentVpnInstance.EntryCountryId;
+                Status.EntryCityId = CurrentVpnInstance.EntryCityId;
+                Status.CountryId = CurrentVpnInstance.CountryId;
+                Status.CityId = CurrentVpnInstance.CityId;
+                Status.VpnType = CurrentVpnInstance.VpnType;
+
                 switch (state)
                 {
                     case VpnState.Restarting:
@@ -359,6 +373,12 @@ public class HVpn : IDisposable
                 OnLogReceived($"OpenVPN Management Sent: {message}");
             };
         }
+
+        CurrentVpnInstance.IsUseMultiNode = connectionInfo.IsUseMultiNode;
+        CurrentVpnInstance.EntryCountryId = connectionInfo.EntryCountryId;
+        CurrentVpnInstance.EntryCityId = connectionInfo.EntryCityId;
+        CurrentVpnInstance.CountryId = connectionInfo.CountryId;
+        CurrentVpnInstance.CityId = connectionInfo.CityId;
 
         CurrentVpnInstance.StartAsync(connectionInfo);
 

@@ -22,6 +22,7 @@ public class OpenVPNServiceInfo
     public string UserName { get; set; }
     public string Password { get; set; }
     public string Protocol { get; set; }
+    public string BinaryServicePath { get; set; }
 }
 
 public class VPNConnectionInfo
@@ -31,5 +32,10 @@ public class VPNConnectionInfo
     public string AdapterName { get; set; }
     public WireguardServiceInfo WireguardServiceInfo { get; set; }
     public OpenVPNServiceInfo OpenVPNServiceInfo { get; set; }
+    public bool IsUseMultiNode { get; set; }
+    public int EntryCountryId { get; set; }
+    public int EntryCityId { get; set; }
+    public int CountryId { get; set; }
+    public int CityId { get; set; }
 
 }

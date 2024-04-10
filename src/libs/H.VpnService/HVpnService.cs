@@ -94,7 +94,8 @@ namespace H.VpnService
                         OpenVPNServiceInfo = new OpenVpn.OpenVPNServiceInfo
                         {
                             UserName = method.Username,
-                            Password = method.Password
+                            Password = method.Password,
+                            BinaryServicePath = method.OpenVPNBinaryServicePath
                         },
                         WireguardServiceInfo = new OpenVpn.WireguardServiceInfo
                         {
@@ -102,7 +103,12 @@ namespace H.VpnService
                             ServiceDescription = method.ServiceDescription,
                             BinaryServicePath = method.BinaryServicePath,
                             DnsServers = method.DnsServers,
-                        }
+                        },
+                        IsUseMultiNode = method.IsUseMultiNode,
+                        EntryCountryId = method.EntryCountryId,
+                        EntryCityId = method.EntryCityId,
+                        CountryId = method.CountryId,
+                        CityId = method.CityId,
                     }).ConfigureAwait(false);
                 }
                 catch (Exception exception)

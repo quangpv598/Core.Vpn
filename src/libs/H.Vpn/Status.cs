@@ -1,4 +1,6 @@
-﻿namespace H.Vpn;
+﻿using H.OpenVpn;
+
+namespace H.Vpn;
 
 public enum VpnStatus
 {
@@ -24,4 +26,10 @@ public class ServiceStatus
     public long BytesIn { get; set; }
     public long BytesOut { get; set; }
     public string? Version { get; set; }
+    public bool IsUseMultiNode { get; set; }
+    public int EntryCountryId { get; set; }
+    public int EntryCityId { get; set; }
+    public int CountryId { get; set; }
+    public int CityId { get; set; }
+    public LibVpnType VpnType { get; set; }
 }

@@ -98,13 +98,17 @@ public static class NetworkMethods
         return new Tuple<uint, ushort>(index, metric);
     }
 
-    public static ulong FindTapAdapterLuid(string adapterDescription)
+    public static List<ulong> FindTapAdapterLuid(string adapterDescription)
     {
-        return ConvertInterfaceIndexToLuid(
-            NativeMethods.GetAdapters(NativeMethods.FAMILY.AF_UNSPEC)
-                .FirstOrDefault(adapter => adapter.Description == adapterDescription || adapter.Description.Contains("WireGuard Tunnel"))?
-                .InterfaceIndex
-            ?? throw new InvalidOperationException("No available TAP adapters found"));
+        var result = new List<ulong>();
+        var indexs = NativeMethods.GetAdapters(NativeMethods.FAMILY.AF_UNSPEC)
+                .Where(adapter => adapter.Description == adapterDescription || adapter.Description.Contains("WireGuard Tunnel"))?
+                .Select(a => a.InterfaceIndex);
+        foreach (var index in indexs)
+        {
+            result.Add(ConvertInterfaceIndexToLuid(index));
+        }
+        return result;
     }
 
     public static ICollection<IPAddress> GetLocalIpsV4()

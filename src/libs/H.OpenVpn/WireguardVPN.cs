@@ -17,6 +17,8 @@ public class WireguardVPN : BaseVPN
     #region Methods
     public override async Task StartAsync(VPNConnectionInfo connectionInfo)
     {
+        VpnType = LibVpnType.Wireguard;
+
         _isRequestDispose = false;
 
         if (connectionInfo?.WireguardServiceInfo == null)
@@ -28,7 +30,7 @@ public class WireguardVPN : BaseVPN
 
         string platform = Environment.Is64BitProcess ? "x64" : "x86";
 
-        string serviceBinaryPath = Path.GetFullPath(_connectionInfo.WireguardServiceInfo.BinaryServicePath);
+        string serviceBinaryPath = Path.GetDirectoryName(_connectionInfo.WireguardServiceInfo.BinaryServicePath);
         string targetTunnelPathFile = Path.Combine(serviceBinaryPath, "tunnel.dll");
         string targetWireguardPathFile = Path.Combine(serviceBinaryPath, "wireguard.dll");
         if (!File.Exists(targetTunnelPathFile))

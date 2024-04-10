@@ -50,6 +50,12 @@ public abstract class BaseVPN : IDisposable
     public string RemoteIpAddress { get; set; } = string.Empty;
     public string RemoteIpPort { get; set; } = string.Empty;
 
+    public bool IsUseMultiNode { get; set; }
+    public int EntryCountryId { get; set; }
+    public int EntryCityId { get; set; }
+    public int CountryId { get; set; }
+    public int CityId { get; set; }
+    public LibVpnType VpnType { get; set; }
     #endregion
 
     #region Events

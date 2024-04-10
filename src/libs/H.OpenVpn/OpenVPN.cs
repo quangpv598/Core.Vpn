@@ -69,6 +69,8 @@ public class HOpenVpn : BaseVPN
 
     public override async Task StartAsync(VPNConnectionInfo connectionInfo)
     {
+        VpnType = LibVpnType.OpenVPN;
+
         if (connectionInfo?.OpenVPNServiceInfo == null)
         {
             throw new ArgumentNullException();
@@ -82,8 +84,7 @@ public class HOpenVpn : BaseVPN
         ConfigPath = Path.GetTempFileName();
         File.WriteAllText(ConfigPath, config);
 
-        var folder = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? string.Empty;
-        var path = Path.Combine(folder, "OpenVPN", Environment.Is64BitProcess ? "lib_x64" : "lib_x86", "openvpn.exe");
+        var path = connectionInfo.OpenVPNServiceInfo.BinaryServicePath;
         var port = NetworkUtilities.GetFreeTcpPort();
 
         Process = Process.Start(new ProcessStartInfo(path,

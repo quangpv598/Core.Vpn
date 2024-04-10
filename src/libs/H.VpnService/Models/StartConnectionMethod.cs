@@ -28,6 +28,10 @@ namespace H.VpnService.Models
 
         [JsonProperty("protocol")]
         public string? Protocol { get; set; }
+
+        [JsonProperty("openVPNBinaryServicePath")]
+        public string? OpenVPNBinaryServicePath { get; set; }
+
         #endregion
 
         #region For Wireguard
@@ -44,6 +48,23 @@ namespace H.VpnService.Models
         [JsonProperty("dnsServers")]
         public List<string> DnsServers { get; set; } = new List<string>();
 
+        #endregion
+
+        #region Others
+        [JsonProperty("isUseMultiNode")]
+        public bool IsUseMultiNode { get; set; }
+
+        [JsonProperty("entryCountryId")]
+        public int EntryCountryId { get; set; }
+
+        [JsonProperty("entryCityId")]
+        public int EntryCityId { get; set; }
+
+        [JsonProperty("countryId")]
+        public int CountryId { get; set; }
+
+        [JsonProperty("cityId")]
+        public int CityId { get; set; }
         #endregion
 
     }
