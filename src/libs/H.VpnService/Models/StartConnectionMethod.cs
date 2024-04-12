@@ -65,6 +65,9 @@ namespace H.VpnService.Models
 
         [JsonProperty("cityId")]
         public int CityId { get; set; }
+
+        [JsonProperty("localCountryCode")]
+        public string LocalCountryCode { get; set; }
         #endregion
 
     }

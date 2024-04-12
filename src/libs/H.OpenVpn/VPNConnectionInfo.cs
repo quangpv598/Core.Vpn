@@ -37,5 +37,6 @@ public class VPNConnectionInfo
     public int EntryCityId { get; set; }
     public int CountryId { get; set; }
     public int CityId { get; set; }
+    public string LocalCountryCode { get; set; }
 
 }

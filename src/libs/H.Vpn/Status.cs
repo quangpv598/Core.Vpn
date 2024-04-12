@@ -9,6 +9,7 @@ public enum VpnStatus
     Reconnecting,
     Disconnecting,
     Disconnected,
+    GetConfigFailed,
     Failed
 }
 
@@ -32,4 +33,5 @@ public class ServiceStatus
     public int CountryId { get; set; }
     public int CityId { get; set; }
     public LibVpnType VpnType { get; set; }
+    public string? LocalCountryCode { get; set; }
 }

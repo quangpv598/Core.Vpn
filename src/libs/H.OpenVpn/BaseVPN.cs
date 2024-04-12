@@ -56,6 +56,7 @@ public abstract class BaseVPN : IDisposable
     public int CountryId { get; set; }
     public int CityId { get; set; }
     public LibVpnType VpnType { get; set; }
+    public string LocalCountryCode { get; set; } = string.Empty;
     #endregion
 
     #region Events

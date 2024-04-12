@@ -251,6 +251,7 @@ public class HVpn : IDisposable
                 Status.CountryId = CurrentVpnInstance.CountryId;
                 Status.CityId = CurrentVpnInstance.CityId;
                 Status.VpnType = CurrentVpnInstance.VpnType;
+                Status.LocalCountryCode = CurrentVpnInstance.LocalCountryCode;
 
                 switch (state)
                 {
@@ -379,6 +380,7 @@ public class HVpn : IDisposable
         CurrentVpnInstance.EntryCityId = connectionInfo.EntryCityId;
         CurrentVpnInstance.CountryId = connectionInfo.CountryId;
         CurrentVpnInstance.CityId = connectionInfo.CityId;
+        CurrentVpnInstance.LocalCountryCode = connectionInfo.LocalCountryCode;
 
         CurrentVpnInstance.StartAsync(connectionInfo);
 
