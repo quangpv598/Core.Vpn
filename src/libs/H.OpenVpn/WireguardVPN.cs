@@ -28,21 +28,29 @@ public class WireguardVPN : BaseVPN
 
         _connectionInfo = connectionInfo ?? throw new ArgumentNullException();
 
+        string serviceBinaryPath = Path.GetDirectoryName(_connectionInfo.WireguardServiceInfo.BinaryServicePath);
+
         string platform = Environment.Is64BitProcess ? "x64" : "x86";
 
-        string serviceBinaryPath = Path.GetDirectoryName(_connectionInfo.WireguardServiceInfo.BinaryServicePath);
+        string sourceTunnelPathFile = Path.Combine(serviceBinaryPath, $"Wireguard/lib_{platform}/tunnel.dll");
+        string sourceWireguardPathFile = Path.Combine(serviceBinaryPath, $"Wireguard/lib_{platform}/wireguard.dll");
+
         string targetTunnelPathFile = Path.Combine(serviceBinaryPath, "tunnel.dll");
         string targetWireguardPathFile = Path.Combine(serviceBinaryPath, "wireguard.dll");
-        if (!File.Exists(targetTunnelPathFile))
+        if (File.Exists(sourceTunnelPathFile) && !File.Exists(targetTunnelPathFile))
         {
-            File.Copy($"Wireguard/lib_{platform}/tunnel.dll", targetTunnelPathFile);
+            File.Copy(sourceTunnelPathFile, targetTunnelPathFile);
         }
 
-        if (!File.Exists(targetWireguardPathFile))
+        if (File.Exists(sourceWireguardPathFile) && !File.Exists(targetWireguardPathFile))
         {
-            File.Copy($"Wireguard/lib_{platform}/wireguard.dll", targetWireguardPathFile);
+            File.Copy(sourceWireguardPathFile, targetWireguardPathFile);
         }
+#if DEBUG
+        File.WriteAllText("C:\\f.txt", $"{File.Exists(targetTunnelPathFile)}\n{File.Exists(targetTunnelPathFile)}");
 
+        Console.WriteLine(targetWireguardPathFile);
+#endif
         ConfigPath = Path.Combine(Path.GetTempPath(), $"{connectionInfo.AdapterName}.conf");
         File.WriteAllText(ConfigPath, connectionInfo.ConfigContent);
 
@@ -74,25 +82,39 @@ public class WireguardVPN : BaseVPN
         const int timesTryToFindAdapter = 10;
         IntPtr handle = IntPtr.Zero;
 
+        Driver.Adapter adapter;
+
         for (int i = 0; i < timesTryToFindAdapter; i++)
         {
-            handle = NativeMethods.openAdapter(_connectionInfo.AdapterName);
-            if (handle != IntPtr.Zero)
+            //handle = NativeMethods.openAdapter(_connectionInfo.AdapterName);
+            //if (handle != IntPtr.Zero)
+            //{
+            //    break;
+            //}
+
+            try
             {
-                break;
+                adapter = Service.GetAdapter(_connectionInfo.AdapterName);
+                if (adapter != null)
+                {
+                    break;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Exception:" + ex.Message);
             }
 
-            await Task.Delay(500);
+            await Task.Delay(1000);
         }
 
-        if (handle == IntPtr.Zero)
-        {
-            VpnState = VpnState.Failed;
-            return;
-        }
+        //if (handle == IntPtr.Zero)
+        //{
+        //    VpnState = VpnState.Failed;
+        //    return;
+        //}
 
-
-        Driver.Adapter adapter = Service.GetAdapter(_connectionInfo.AdapterName);
+        adapter = Service.GetAdapter(_connectionInfo.AdapterName);
         if (adapter == null)
         {
             VpnState = VpnState.Failed;
@@ -183,5 +205,5 @@ public class WireguardVPN : BaseVPN
             // ignored
         }
     }
-    #endregion
+#endregion
 }

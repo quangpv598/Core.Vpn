@@ -15,36 +15,36 @@ public static class NativeMethods
     private const string TUNNEL_X86_PATH = "Wireguard/lib_x86/tunnel.dll";
 
     #region X64
-    [DllImport(WIREGUARD_X64_PATH, EntryPoint = "WireGuardOpenAdapter", CallingConvention = CallingConvention.StdCall, SetLastError = true)]
+    [DllImport("Wireguard/lib_x64/wireguard.dll", EntryPoint = "WireGuardOpenAdapter", CallingConvention = CallingConvention.StdCall, SetLastError = true)]
     private static extern IntPtr openAdapter_x64([MarshalAs(UnmanagedType.LPWStr)] string name);
 
-    [DllImport(WIREGUARD_X64_PATH, EntryPoint = "WireGuardCloseAdapter", CallingConvention = CallingConvention.StdCall)]
+    [DllImport("Wireguard/lib_x64/wireguard.dll", EntryPoint = "WireGuardCloseAdapter", CallingConvention = CallingConvention.StdCall)]
     private static extern void freeAdapter_x64(IntPtr adapter);
 
-    [DllImport(WIREGUARD_X64_PATH, EntryPoint = "WireGuardGetConfiguration", CallingConvention = CallingConvention.StdCall, SetLastError = true)]
+    [DllImport("Wireguard/lib_x64/wireguard.dll", EntryPoint = "WireGuardGetConfiguration", CallingConvention = CallingConvention.StdCall, SetLastError = true)]
     private static extern bool getConfiguration_x64(IntPtr adapter, byte[] iface, ref UInt32 bytes);
 
-    [DllImport(TUNNEL_X64_PATH, EntryPoint = "WireGuardGenerateKeypair", CallingConvention = CallingConvention.Cdecl)]
+    [DllImport("Wireguard/lib_x64/tunnel.dll", EntryPoint = "WireGuardGenerateKeypair", CallingConvention = CallingConvention.Cdecl)]
     private static extern bool WireGuardGenerateKeypair_x64(byte[] publicKey, byte[] privateKey);
 
-    [DllImport(TUNNEL_X64_PATH, EntryPoint = "WireGuardTunnelService", CallingConvention = CallingConvention.Cdecl)]
+    [DllImport("Wireguard/lib_x64/tunnel.dll", EntryPoint = "WireGuardTunnelService", CallingConvention = CallingConvention.Cdecl)]
     public static extern bool Run_x64([MarshalAs(UnmanagedType.LPWStr)] string configFile);
     #endregion
 
     #region X86
-    [DllImport(WIREGUARD_X86_PATH, EntryPoint = "WireGuardOpenAdapter", CallingConvention = CallingConvention.StdCall, SetLastError = true)]
+    [DllImport("Wireguard/lib_x86/wireguard.dll", EntryPoint = "WireGuardOpenAdapter", CallingConvention = CallingConvention.StdCall, SetLastError = true)]
     private static extern IntPtr openAdapter_x86([MarshalAs(UnmanagedType.LPWStr)] string name);
 
-    [DllImport(WIREGUARD_X86_PATH, EntryPoint = "WireGuardCloseAdapter", CallingConvention = CallingConvention.StdCall)]
+    [DllImport("Wireguard/lib_x86/wireguard.dll", EntryPoint = "WireGuardCloseAdapter", CallingConvention = CallingConvention.StdCall)]
     private static extern void freeAdapter_x86(IntPtr adapter);
 
-    [DllImport(WIREGUARD_X86_PATH, EntryPoint = "WireGuardGetConfiguration", CallingConvention = CallingConvention.StdCall, SetLastError = true)]
+    [DllImport("Wireguard/lib_x86/wireguard.dll", EntryPoint = "WireGuardGetConfiguration", CallingConvention = CallingConvention.StdCall, SetLastError = true)]
     private static extern bool getConfiguration_x86(IntPtr adapter, byte[] iface, ref UInt32 bytes);
 
-    [DllImport(TUNNEL_X86_PATH, EntryPoint = "WireGuardGenerateKeypair", CallingConvention = CallingConvention.Cdecl)]
+    [DllImport("Wireguard/lib_x86/tunnel.dll", EntryPoint = "WireGuardGenerateKeypair", CallingConvention = CallingConvention.Cdecl)]
     private static extern bool WireGuardGenerateKeypair_x86(byte[] publicKey, byte[] privateKey);
 
-    [DllImport(TUNNEL_X86_PATH, EntryPoint = "WireGuardTunnelService", CallingConvention = CallingConvention.Cdecl)]
+    [DllImport("Wireguard/lib_x86/tunnel.dll", EntryPoint = "WireGuardTunnelService", CallingConvention = CallingConvention.Cdecl)]
     public static extern bool Run_x86([MarshalAs(UnmanagedType.LPWStr)] string configFile);
     #endregion
 
@@ -90,20 +90,20 @@ public static class NativeMethods
 
     //private const string TUNNEL_PATH = "tunnel.dll";
 
-    //#region X64
-    //[DllImport(WIREGUARD_PATH, EntryPoint = "WireGuardOpenAdapter", CallingConvention = CallingConvention.StdCall, SetLastError = true)]
+    //#region GENERAL
+    //[DllImport("wireguard.dll", EntryPoint = "WireGuardOpenAdapter", CallingConvention = CallingConvention.StdCall, SetLastError = true)]
     //public static extern IntPtr openAdapter([MarshalAs(UnmanagedType.LPWStr)] string name);
 
-    //[DllImport(WIREGUARD_PATH, EntryPoint = "WireGuardCloseAdapter", CallingConvention = CallingConvention.StdCall)]
+    //[DllImport("wireguard.dll", EntryPoint = "WireGuardCloseAdapter", CallingConvention = CallingConvention.StdCall)]
     //public static extern void freeAdapter(IntPtr adapter);
 
-    //[DllImport(WIREGUARD_PATH, EntryPoint = "WireGuardGetConfiguration", CallingConvention = CallingConvention.StdCall, SetLastError = true)]
+    //[DllImport("wireguard.dll", EntryPoint = "WireGuardGetConfiguration", CallingConvention = CallingConvention.StdCall, SetLastError = true)]
     //public static extern bool getConfiguration(IntPtr adapter, byte[] iface, ref UInt32 bytes);
 
-    //[DllImport(TUNNEL_PATH, EntryPoint = "WireGuardGenerateKeypair", CallingConvention = CallingConvention.Cdecl)]
+    //[DllImport("tunnel.dll", EntryPoint = "WireGuardGenerateKeypair", CallingConvention = CallingConvention.Cdecl)]
     //public static extern bool WireGuardGenerateKeypair(byte[] publicKey, byte[] privateKey);
 
-    //[DllImport(TUNNEL_PATH, EntryPoint = "WireGuardTunnelService", CallingConvention = CallingConvention.Cdecl)]
+    //[DllImport("tunnel.dll", EntryPoint = "WireGuardTunnelService", CallingConvention = CallingConvention.Cdecl)]
     //public static extern bool Run([MarshalAs(UnmanagedType.LPWStr)] string configFile);
     //#endregion
 }
