@@ -109,6 +109,7 @@ namespace H.VpnService
                         EntryCityId = method.EntryCityId,
                         CountryId = method.CountryId,
                         CityId = method.CityId,
+                        IsUseKillSwitch = method.IsUseKillSwitch
                     }).ConfigureAwait(false);
                 }
                 catch (Exception exception)

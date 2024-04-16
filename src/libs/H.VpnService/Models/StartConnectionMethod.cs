@@ -51,6 +51,9 @@ namespace H.VpnService.Models
         #endregion
 
         #region Others
+        [JsonProperty("isUseKillSwitch")]
+        public bool IsUseKillSwitch { get; set; }
+
         [JsonProperty("isUseMultiNode")]
         public bool IsUseMultiNode { get; set; }
 

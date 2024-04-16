@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Net.NetworkInformation;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
+using H.OpenVpn.Utilities;
 using H.OpenVpn.Wireguard.Tunnel;
 using H.OpenVpn.Wireguard.TunnelDll;
 
@@ -17,9 +20,9 @@ public class WireguardVPN : BaseVPN
     #region Methods
     public override async Task StartAsync(VPNConnectionInfo connectionInfo)
     {
-        VpnType = LibVpnType.Wireguard;
-
         _isRequestDispose = false;
+
+        VpnType = LibVpnType.Wireguard;
 
         if (connectionInfo?.WireguardServiceInfo == null)
         {
@@ -58,7 +61,7 @@ public class WireguardVPN : BaseVPN
 
         await Task.Run(() => Service.Add(connectionInfo, ConfigPath, true));
 
-        Task.Run(OnWireguardHandler);
+        Task.Run(() => OnWireguardHandler(connectionInfo.IsUseKillSwitch));
     }
 
     private void GetDnsServers(VPNConnectionInfo connectionInfo)
@@ -77,42 +80,29 @@ public class WireguardVPN : BaseVPN
         }
     }
 
-    private async Task OnWireguardHandler()
+    private async Task OnWireguardHandler(bool isKillSwitch)
     {
-        const int timesTryToFindAdapter = 10;
+        const int timesTryToFindAdapter = 5;
         IntPtr handle = IntPtr.Zero;
 
         Driver.Adapter adapter;
 
         for (int i = 0; i < timesTryToFindAdapter; i++)
         {
-            //handle = NativeMethods.openAdapter(_connectionInfo.AdapterName);
-            //if (handle != IntPtr.Zero)
-            //{
-            //    break;
-            //}
-
-            try
+            handle = NativeMethods.openAdapter(_connectionInfo.AdapterName);
+            if (handle != IntPtr.Zero)
             {
-                adapter = Service.GetAdapter(_connectionInfo.AdapterName);
-                if (adapter != null)
-                {
-                    break;
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Exception:" + ex.Message);
+                break;
             }
 
             await Task.Delay(1000);
         }
 
-        //if (handle == IntPtr.Zero)
-        //{
-        //    VpnState = VpnState.Failed;
-        //    return;
-        //}
+        if (handle == IntPtr.Zero)
+        {
+            VpnState = VpnState.Failed;
+            return;
+        }
 
         adapter = Service.GetAdapter(_connectionInfo.AdapterName);
         if (adapter == null)
@@ -122,6 +112,10 @@ public class WireguardVPN : BaseVPN
         }
 
         VpnState = VpnState.Connected;
+
+        int countIsOnline = 0;
+        const int maxCountIsOnline = 5;
+
         while (handle != IntPtr.Zero)
         {
             try
@@ -144,8 +138,25 @@ public class WireguardVPN : BaseVPN
 
                 OnBytesInOutCountChanged(new InOutBytes((long)rx, (long)tx));
 
-
                 await Task.Delay(1000);
+
+                var isOnline = await NetworkUtilities.IsAppOnline(isKillSwitch);
+
+                if (isOnline)
+                {
+                    countIsOnline = 0;
+                }
+                else
+                {
+                    countIsOnline++;
+                }
+
+                if (countIsOnline >= maxCountIsOnline)
+                {
+                    countIsOnline = 0;
+                    VpnState = VpnState.Reconnecting;
+                    Task.Run(() => Dispose(true));
+                }
 
                 handle = NativeMethods.openAdapter(_connectionInfo.AdapterName);
             }
@@ -160,6 +171,8 @@ public class WireguardVPN : BaseVPN
             }
 
         }
+
+        adapter = null;
     }
 
     protected override void Dispose(bool disposing)
@@ -205,5 +218,6 @@ public class WireguardVPN : BaseVPN
             // ignored
         }
     }
-#endregion
+
+    #endregion
 }

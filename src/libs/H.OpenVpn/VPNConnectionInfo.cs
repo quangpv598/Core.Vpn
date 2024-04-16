@@ -32,6 +32,7 @@ public class VPNConnectionInfo
     public string AdapterName { get; set; }
     public WireguardServiceInfo WireguardServiceInfo { get; set; }
     public OpenVPNServiceInfo OpenVPNServiceInfo { get; set; }
+    public bool IsUseKillSwitch { get; set; }
     public bool IsUseMultiNode { get; set; }
     public int EntryCountryId { get; set; }
     public int EntryCityId { get; set; }
