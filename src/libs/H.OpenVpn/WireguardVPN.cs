@@ -57,14 +57,14 @@ public class WireguardVPN : BaseVPN
         ConfigPath = Path.Combine(Path.GetTempPath(), $"{connectionInfo.AdapterName}.conf");
         File.WriteAllText(ConfigPath, connectionInfo.ConfigContent);
 
-        GetDnsServers(connectionInfo);
+        GetServerInfo(connectionInfo);
 
         await Task.Run(() => Service.Add(connectionInfo, ConfigPath, true));
 
         Task.Run(() => OnWireguardHandler(connectionInfo.IsUseKillSwitch));
     }
 
-    private void GetDnsServers(VPNConnectionInfo connectionInfo)
+    private void GetServerInfo(VPNConnectionInfo connectionInfo)
     {
         string dnsPattern = @"DNS\s*=\s*([\d.]+)";
         MatchCollection matches = Regex.Matches(connectionInfo.ConfigContent, dnsPattern);
@@ -77,6 +77,14 @@ public class WireguardVPN : BaseVPN
                 dnsServers = new List<string>();
             }
             dnsServers.Add(match.Groups[1].Value);
+        }
+
+        string patternEndpoint = @"Endpoint\s*=\s*([\d.]+)";
+        Match matchEndpoint = Regex.Match(connectionInfo.ConfigContent, patternEndpoint);
+        if (matchEndpoint.Success)
+        {
+            string endpointAddress = matchEndpoint.Groups[1].Value;
+            RemoteIpAddress = endpointAddress;
         }
     }
 
