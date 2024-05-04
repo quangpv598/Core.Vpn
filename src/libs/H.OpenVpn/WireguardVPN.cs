@@ -20,6 +20,7 @@ public class WireguardVPN : BaseVPN
     #region Methods
     public override async Task StartAsync(VPNConnectionInfo connectionInfo)
     {
+        Debug.WriteLine($"Connect to {connectionInfo.CountryId}");
         _isRequestDispose = false;
 
         VpnType = LibVpnType.Wireguard;
@@ -119,6 +120,8 @@ public class WireguardVPN : BaseVPN
             return;
         }
 
+        Debug.WriteLine($"Connected: {_connectionInfo.CountryId}");
+
         VpnState = VpnState.Connected;
 
         int countIsOnline = 0;
@@ -146,9 +149,13 @@ public class WireguardVPN : BaseVPN
 
                 OnBytesInOutCountChanged(new InOutBytes((long)rx, (long)tx));
 
-                await Task.Delay(1000);
-
                 var isOnline = await NetworkUtilities.IsAppOnline(isKillSwitch);
+
+                if (_isRequestDispose)
+                {
+                    adapter = null;
+                    break;
+                }
 
                 if (isOnline)
                 {
@@ -164,6 +171,7 @@ public class WireguardVPN : BaseVPN
                     countIsOnline = 0;
                     VpnState = VpnState.Reconnecting;
                     Task.Run(() => Dispose(true));
+                    break;
                 }
 
                 handle = NativeMethods.openAdapter(_connectionInfo.AdapterName);
@@ -172,10 +180,14 @@ public class WireguardVPN : BaseVPN
             {
                 adapter = null;
                 VpnState = VpnState.Exiting;
+                break;
             }
             finally
             {
                 _isGettingTraffic = false;
+
+                await Task.Delay(1000);
+
             }
 
         }
@@ -187,11 +199,13 @@ public class WireguardVPN : BaseVPN
     {
         _isRequestDispose = true;
 
+        Debug.WriteLine("Dispose");
+
         try
         {
             while (_isGettingTraffic)
             {
-                Thread.Sleep(500);
+                Task.Delay(100).Wait();
                 continue;
             }
         }

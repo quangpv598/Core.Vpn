@@ -31,7 +31,7 @@ internal static class NetworkUtilities
         {
             if (isUseKillSwitch)
             {
-                return IsConnectedToInternet() && await PingWithHttpClient();
+                return IsConnectedToInternet();// && await PingWithHttpClient();
             }
             else
             {
@@ -49,12 +49,12 @@ internal static class NetworkUtilities
         try
         {
             HttpClient httpClient = new HttpClient();
-            httpClient.Timeout = TimeSpan.FromSeconds(10);
+            httpClient.Timeout = TimeSpan.FromSeconds(5);
             var res = await httpClient.GetAsync("https://checkip.amazonaws.com/");
             res.EnsureSuccessStatusCode();
             return res.IsSuccessStatusCode;
         }
-        catch
+        catch(Exception ex)
         {
             return false;
         }
