@@ -31,7 +31,7 @@ internal static class NetworkUtilities
         {
             if (isUseKillSwitch)
             {
-                return IsConnectedToInternet();// && await PingWithHttpClient();
+                return IsConnectedToInternet() && await PingWithHttpClient();
             }
             else
             {

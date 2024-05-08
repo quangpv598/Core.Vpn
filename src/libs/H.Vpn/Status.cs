@@ -10,6 +10,7 @@ public enum VpnStatus
     Disconnecting,
     Disconnected,
     GetConfigFailed,
+    Cancelling,
     Failed
 }
 
