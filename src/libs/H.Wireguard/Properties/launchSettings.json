@@ -2,7 +2,7 @@
   "profiles": {
     "H.WireguardService": {
       "commandName": "Project",
-      "commandLineArgs": "\"G:\\Projects\\SolarVPN\\solarvpn\\SolarVPN.Output\\Debug\\net6.0-windows\\H.WireguardService.exe\" /config \"C:\\Users\\quang\\AppData\\Local\\Temp\\SolarVPN-WG.conf\" /dns 10.8.87.33\r\n"
+      "commandLineArgs": "/config \"C:\\Users\\quang\\AppData\\Local\\Temp\\SolarVPN-WG.conf\""
     }
   }
 }

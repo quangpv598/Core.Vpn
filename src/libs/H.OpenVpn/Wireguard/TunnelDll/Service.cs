@@ -39,7 +39,7 @@ namespace H.OpenVpn.Wireguard.Tunnel
                     dnsParams = dnsParams.Trim();
                 }
 
-                var pathAndArgs = string.Format("\"{0}\" /config \"{1}\" /dns {2}", exeName, configFile, dnsParams);
+                var pathAndArgs = string.Format("\"{0}\" /config \"{1}\"", exeName, configFile);
                 var scm = Win32.OpenSCManager(null, null, Win32.ScmAccessRights.AllAccess);
                 if (scm == IntPtr.Zero)
                     throw new Win32Exception(Marshal.GetLastWin32Error());
@@ -48,14 +48,15 @@ namespace H.OpenVpn.Wireguard.Tunnel
                     var service = Win32.OpenService(scm, shortName, Win32.ServiceAccessRights.AllAccess);
                     if (service != IntPtr.Zero)
                     {
-                        Win32.CloseServiceHandle(service);
+                        //Win32.CloseServiceHandle(service);
                         Remove(shortName, true);
                     }
-                    service = Win32.CreateService(scm, shortName, longName, Win32.ServiceAccessRights.AllAccess, Win32.ServiceType.Win32OwnProcess, Win32.ServiceStartType.Demand, Win32.ServiceError.Normal, pathAndArgs, null, IntPtr.Zero, "Nsi\0TcpIp\0", null, null);
-                    if (service == IntPtr.Zero)
-                        throw new Win32Exception(Marshal.GetLastWin32Error());
-                    try
+                    else
                     {
+                        service = Win32.CreateService(scm, shortName, longName, Win32.ServiceAccessRights.AllAccess, Win32.ServiceType.Win32OwnProcess, Win32.ServiceStartType.Demand, Win32.ServiceError.Normal, pathAndArgs, null, IntPtr.Zero, "Nsi\0TcpIp\0", null, null);
+                        if (service == IntPtr.Zero)
+                            throw new Win32Exception(Marshal.GetLastWin32Error());
+
                         var sidType = Win32.ServiceSidType.Unrestricted;
                         if (!Win32.ChangeServiceConfig2(service, Win32.ServiceConfigType.SidInfo, ref sidType))
                             throw new Win32Exception(Marshal.GetLastWin32Error());
@@ -63,17 +64,28 @@ namespace H.OpenVpn.Wireguard.Tunnel
                         var description = new Win32.ServiceDescription { lpDescription = connectionInfo.WireguardServiceInfo.ServiceDescription };
                         if (!Win32.ChangeServiceConfig2(service, Win32.ServiceConfigType.Description, ref description))
                             throw new Win32Exception(Marshal.GetLastWin32Error());
+                    }
 
+                    try
+                    {
                         if (!Win32.StartService(service, 0, null))
                             throw new Win32Exception(Marshal.GetLastWin32Error());
 
-                        if (ephemeral && !Win32.DeleteService(service))
-                            throw new Win32Exception(Marshal.GetLastWin32Error());
+                        //if (ephemeral && !Win32.DeleteService(service))
+                        //    throw new Win32Exception(Marshal.GetLastWin32Error());
+                    }
+                    catch (Exception ex)
+                    {
+
                     }
                     finally
                     {
                         Win32.CloseServiceHandle(service);
                     }
+                }
+                catch (Exception ex)
+                {
+
                 }
                 finally
                 {
@@ -82,7 +94,7 @@ namespace H.OpenVpn.Wireguard.Tunnel
             }
             catch (Exception ex)
             {
-                
+
             }
         }
 
@@ -105,9 +117,8 @@ namespace H.OpenVpn.Wireguard.Tunnel
 
                     for (int i = 0; waitForStop && i < 180 && Win32.QueryServiceStatus(service, serviceStatus) && serviceStatus.dwCurrentState != Win32.ServiceState.Stopped; ++i)
                         Thread.Sleep(1000);
-
-                    if (!Win32.DeleteService(service) && Marshal.GetLastWin32Error() != 0x00000430)
-                        throw new Win32Exception(Marshal.GetLastWin32Error());
+                    //if (!Win32.DeleteService(service) && Marshal.GetLastWin32Error() != 0x00000430)
+                    //    throw new Win32Exception(Marshal.GetLastWin32Error());
                 }
                 finally
                 {
@@ -119,5 +130,6 @@ namespace H.OpenVpn.Wireguard.Tunnel
                 Win32.CloseServiceHandle(scm);
             }
         }
+
     }
 }

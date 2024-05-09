@@ -23,8 +23,8 @@ public class WireguardVPN : BaseVPN
     private bool _isGettingTraffic = false;
     private VPNConnectionInfo _connectionInfo = null;
 
-    //private readonly BackgroundWorker _tunnelConnectionWorker;
-    //private readonly BackgroundWorker _tunnelStateWorker;
+    private readonly BackgroundWorker _tunnelConnectionWorker;
+    private readonly BackgroundWorker _tunnelStateWorker;
 
     ///**
     // * @brief The manager that handles the Wireguard connections.
@@ -41,79 +41,123 @@ public class WireguardVPN : BaseVPN
     }
 
 
-    ///// <summary>
-    /////     Initialize a <see cref="T:BackgroundWorker" /> which retrieves tunnel connecting / connecting state and updates it
-    /////     in the UI
-    ///// </summary>
-    ///// <returns>
-    /////     <see cref="T:BackgroundWorker" />
-    ///// </returns>
-    //private BackgroundWorker InitializeTunnelConnectionWorker()
-    //{
-    //    var worker = new BackgroundWorker
-    //    {
-    //        WorkerSupportsCancellation = true,
-    //        WorkerReportsProgress = true
-    //    };
+    /// <summary>
+    ///     Initialize a <see cref="T:BackgroundWorker" /> which retrieves tunnel connecting / connecting state and updates it
+    ///     in the UI
+    /// </summary>
+    /// <returns>
+    ///     <see cref="T:BackgroundWorker" />
+    /// </returns>
+    private BackgroundWorker InitializeTunnelConnectionWorker()
+    {
+        var worker = new BackgroundWorker
+        {
+            WorkerSupportsCancellation = true,
+            WorkerReportsProgress = true
+        };
 
-    //    worker.DoWork += (s, e) =>
-    //    {
-    //        do
-    //        {
-    //            Thread.Sleep(500);
-    //            worker.ReportProgress(0, _wiresock.Connected);
-    //        } while (!worker.CancellationPending && !_wiresock.Connected);
-    //    };
+        worker.DoWork += (s, e) =>
+        {
+            do
+            {
+                Thread.Sleep(500);
 
-    //    worker.ProgressChanged += (s, e) =>
-    //    {
-    //        if ((bool)e.UserState)
-    //        {
-    //            if (!_tunnelStateWorker.IsBusy)
-    //                _tunnelStateWorker.RunWorkerAsync();
-    //        }
-    //    };
+                const int timesTryToFindAdapter = 30;
+                IntPtr handle = IntPtr.Zero;
 
-    //    return worker;
-    //}
+                Driver.Adapter adapter;
 
-    ///// <summary>
-    /////     Initialize a <see cref="T:BackgroundWorker" /> which retrieves the connected tunnel state and updates it in the UI
-    ///// </summary>
-    ///// <returns>
-    /////     <see cref="T:BackgroundWorker" />
-    ///// </returns>
-    //private BackgroundWorker InitTunnelStateWorker()
-    //{
-    //    var worker = new BackgroundWorker
-    //    {
-    //        WorkerSupportsCancellation = true,
-    //        WorkerReportsProgress = true
-    //    };
+                for (int i = 0; i < timesTryToFindAdapter; i++)
+                {
+                    handle = NativeMethods.openAdapter(_connectionInfo.AdapterName);
+                    if (handle != IntPtr.Zero)
+                    {
+                        break;
+                    }
 
-    //    worker.DoWork += (s, e) =>
-    //    {
-    //        while (!worker.CancellationPending)
-    //        {
-    //            Thread.Sleep(1000);
+                    Thread.Sleep(1000);
+                }
 
-    //            if (!_wiresock.Connected) continue;
+                if (handle == IntPtr.Zero)
+                {
+                    VpnState = VpnState.Failed;
+                    return;
+                }
 
-    //            var stats = _wiresock.GetState();
-    //            worker.ReportProgress(0, stats);
-    //        }
-    //    };
+                adapter = Service.GetAdapter(_connectionInfo.AdapterName);
+                if (adapter == null)
+                {
+                    VpnState = VpnState.Failed;
+                    return;
+                }
 
-    //    worker.ProgressChanged += (s, e) =>
-    //    {
-    //        if (!(e.UserState is WgbStats stats)) return;
+                Debug.WriteLine($"Connected: {_connectionInfo.CountryId}");
 
-    //        OnBytesInOutCountChanged(new InOutBytes((long)stats.rx_bytes, (long)stats.tx_bytes));
+                VpnState = VpnState.Connected;
 
-    //    };
+                worker.ReportProgress(0, VpnState == VpnState.Connected);
+            } while (!worker.CancellationPending && VpnState != VpnState.Connected);
+        };
 
-    //    return worker;
-    //}
+        worker.ProgressChanged += (s, e) =>
+        {
+            if ((bool)e.UserState)
+            {
+                if (!_tunnelStateWorker.IsBusy)
+                    _tunnelStateWorker.RunWorkerAsync();
+            }
+        };
+
+        return worker;
+    }
+
+    /// <summary>
+    ///     Initialize a <see cref="T:BackgroundWorker" /> which retrieves the connected tunnel state and updates it in the UI
+    /// </summary>
+    /// <returns>
+    ///     <see cref="T:BackgroundWorker" />
+    /// </returns>
+    private BackgroundWorker InitTunnelStateWorker()
+    {
+        var worker = new BackgroundWorker
+        {
+            WorkerSupportsCancellation = true,
+            WorkerReportsProgress = true
+        };
+
+        worker.DoWork += (s, e) =>
+        {
+            var adapter = Service.GetAdapter(_connectionInfo.AdapterName);
+
+            while (!worker.CancellationPending)
+            {
+                Thread.Sleep(1000);
+
+                if (VpnState != VpnState.Connected) continue;
+
+                ulong rx = 0, tx = 0;
+                var config = adapter.GetConfiguration();
+                foreach (var peer in config.Peers)
+                {
+                    rx += peer.RxBytes;
+                    tx += peer.TxBytes;
+                }
+
+                var stats = new InOutBytes((long)rx, (long)tx);
+                worker.ReportProgress(0, stats);
+            }
+        };
+
+        worker.ProgressChanged += (s, e) =>
+        {
+            if (!(e.UserState is InOutBytes stats)) return;
+
+            OnBytesInOutCountChanged(stats);
+
+        };
+
+        return worker;
+    }
 
     //private void OnWireSockLogMessage(WireSockManager.LogMessage logMessage)
     //{
@@ -147,12 +191,26 @@ public class WireguardVPN : BaseVPN
         string targetWireguardPathFile = Path.Combine(serviceBinaryPath, "wireguard.dll");
         if (File.Exists(sourceTunnelPathFile) && !File.Exists(targetTunnelPathFile))
         {
-            File.Copy(sourceTunnelPathFile, targetTunnelPathFile);
+            try
+            {
+                File.Copy(sourceTunnelPathFile, targetTunnelPathFile, true);
+            }
+            catch (Exception ex)
+            {
+
+            }
         }
 
         if (File.Exists(sourceWireguardPathFile) && !File.Exists(targetWireguardPathFile))
         {
-            File.Copy(sourceWireguardPathFile, targetWireguardPathFile);
+            try
+            {
+                File.Copy(sourceWireguardPathFile, targetWireguardPathFile, true);
+            }
+            catch (Exception ex)
+            {
+
+            }
         }
 #if DEBUG
         File.WriteAllText("C:\\f.txt", $"{File.Exists(targetTunnelPathFile)}\n{File.Exists(targetTunnelPathFile)}");
@@ -179,9 +237,21 @@ public class WireguardVPN : BaseVPN
 
         GetServerInfoAsync(connectionInfo);
 
-        await Task.Run(() => Service.Add(connectionInfo, ConfigPath, true));
+        Task.Run(() => Service.Add(connectionInfo, ConfigPath, true)).ContinueWith(x =>
+        {
+            OnWireguardHandler(connectionInfo.IsUseKillSwitch);
+            //try
+            //{
+            //    if (!_tunnelConnectionWorker.IsBusy)
+            //        _tunnelConnectionWorker.RunWorkerAsync();
+            //}
+            //catch (Exception ex)
+            //{
+            //    VpnState = VpnState.Failed;
+            //}
+        });
 
-        Task.Run(() => OnWireguardHandler(connectionInfo.IsUseKillSwitch));
+        //Task.Run(() => OnWireguardHandler(connectionInfo.IsUseKillSwitch));
     }
 
     private async Task GetServerInfoAsync(VPNConnectionInfo connectionInfo)
@@ -224,7 +294,7 @@ public class WireguardVPN : BaseVPN
                 break;
             }
 
-            await Task.Delay(1000);
+            Thread.Sleep(1000);
         }
 
         if (handle == IntPtr.Zero)
@@ -334,28 +404,27 @@ public class WireguardVPN : BaseVPN
 
         }
 
+        //try
+        //{
+        //    _tunnelStateWorker.CancelAsync();
+        //}
+        //catch (Exception ex)
+        //{
+
+        //}
+
         try
         {
             if (_connectionInfo != null
                 && _connectionInfo.WireguardServiceInfo != null)
             {
-                Service.Remove(_connectionInfo.WireguardServiceInfo.ServiceName, true);
+                Service.Remove(_connectionInfo.WireguardServiceInfo.ServiceName, false);
             }
         }
         catch (Exception)
         {
             // ignored
         }
-
-        //try
-        //{
-        //    _tunnelStateWorker.CancelAsync();
-        //    _wiresock.Disconnect();
-        //}
-        //catch (Exception ex)
-        //{
-
-        //}
 
         try
         {
