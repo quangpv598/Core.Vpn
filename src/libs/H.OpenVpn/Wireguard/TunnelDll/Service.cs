@@ -20,7 +20,7 @@ namespace H.OpenVpn.Wireguard.Tunnel
             return new Driver.Adapter(adapterName);
         }
 
-        public static void Add(VPNConnectionInfo connectionInfo, string configFile, bool ephemeral)
+        public static bool Add(VPNConnectionInfo connectionInfo, string configFile, bool ephemeral)
         {
             try
             {
@@ -76,7 +76,7 @@ namespace H.OpenVpn.Wireguard.Tunnel
                     }
                     catch (Exception ex)
                     {
-
+                        throw;
                     }
                     finally
                     {
@@ -85,7 +85,7 @@ namespace H.OpenVpn.Wireguard.Tunnel
                 }
                 catch (Exception ex)
                 {
-
+                    throw;
                 }
                 finally
                 {
@@ -94,8 +94,10 @@ namespace H.OpenVpn.Wireguard.Tunnel
             }
             catch (Exception ex)
             {
-
+                return false;
             }
+
+            return true;
         }
 
         public static void Remove(string serviceName, bool waitForStop)

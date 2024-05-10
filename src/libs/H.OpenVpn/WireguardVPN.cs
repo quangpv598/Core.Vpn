@@ -11,7 +11,6 @@ using System.Text.RegularExpressions;
 using System.Xml.Linq;
 using H.OpenVpn.Utilities;
 using H.OpenVpn.Wireguard;
-using H.OpenVpn.Wireguard.Config;
 using H.OpenVpn.Wireguard.Tunnel;
 using H.OpenVpn.Wireguard.TunnelDll;
 using static H.OpenVpn.Wireguard.Native.WireguardBoosterExports;
@@ -23,147 +22,10 @@ public class WireguardVPN : BaseVPN
     private bool _isGettingTraffic = false;
     private VPNConnectionInfo _connectionInfo = null;
 
-    private readonly BackgroundWorker _tunnelConnectionWorker;
-    private readonly BackgroundWorker _tunnelStateWorker;
-
-    ///**
-    // * @brief The manager that handles the Wireguard connections.
-    // */
-    //private readonly WireSockManager _wiresock;
-
     public WireguardVPN()
     {
-        //_tunnelConnectionWorker = InitializeTunnelConnectionWorker();
-        //_tunnelStateWorker = InitTunnelStateWorker();
-
-        //// Create a new WireSockManager instance, attached to the logging control
-        //_wiresock = new WireSockManager(OnWireSockLogMessage);
+        
     }
-
-
-    /// <summary>
-    ///     Initialize a <see cref="T:BackgroundWorker" /> which retrieves tunnel connecting / connecting state and updates it
-    ///     in the UI
-    /// </summary>
-    /// <returns>
-    ///     <see cref="T:BackgroundWorker" />
-    /// </returns>
-    private BackgroundWorker InitializeTunnelConnectionWorker()
-    {
-        var worker = new BackgroundWorker
-        {
-            WorkerSupportsCancellation = true,
-            WorkerReportsProgress = true
-        };
-
-        worker.DoWork += (s, e) =>
-        {
-            do
-            {
-                Thread.Sleep(500);
-
-                const int timesTryToFindAdapter = 30;
-                IntPtr handle = IntPtr.Zero;
-
-                Driver.Adapter adapter;
-
-                for (int i = 0; i < timesTryToFindAdapter; i++)
-                {
-                    handle = NativeMethods.openAdapter(_connectionInfo.AdapterName);
-                    if (handle != IntPtr.Zero)
-                    {
-                        break;
-                    }
-
-                    Thread.Sleep(1000);
-                }
-
-                if (handle == IntPtr.Zero)
-                {
-                    VpnState = VpnState.Failed;
-                    return;
-                }
-
-                adapter = Service.GetAdapter(_connectionInfo.AdapterName);
-                if (adapter == null)
-                {
-                    VpnState = VpnState.Failed;
-                    return;
-                }
-
-                Debug.WriteLine($"Connected: {_connectionInfo.CountryId}");
-
-                VpnState = VpnState.Connected;
-
-                worker.ReportProgress(0, VpnState == VpnState.Connected);
-            } while (!worker.CancellationPending && VpnState != VpnState.Connected);
-        };
-
-        worker.ProgressChanged += (s, e) =>
-        {
-            if ((bool)e.UserState)
-            {
-                if (!_tunnelStateWorker.IsBusy)
-                    _tunnelStateWorker.RunWorkerAsync();
-            }
-        };
-
-        return worker;
-    }
-
-    /// <summary>
-    ///     Initialize a <see cref="T:BackgroundWorker" /> which retrieves the connected tunnel state and updates it in the UI
-    /// </summary>
-    /// <returns>
-    ///     <see cref="T:BackgroundWorker" />
-    /// </returns>
-    private BackgroundWorker InitTunnelStateWorker()
-    {
-        var worker = new BackgroundWorker
-        {
-            WorkerSupportsCancellation = true,
-            WorkerReportsProgress = true
-        };
-
-        worker.DoWork += (s, e) =>
-        {
-            var adapter = Service.GetAdapter(_connectionInfo.AdapterName);
-
-            while (!worker.CancellationPending)
-            {
-                Thread.Sleep(1000);
-
-                if (VpnState != VpnState.Connected) continue;
-
-                ulong rx = 0, tx = 0;
-                var config = adapter.GetConfiguration();
-                foreach (var peer in config.Peers)
-                {
-                    rx += peer.RxBytes;
-                    tx += peer.TxBytes;
-                }
-
-                var stats = new InOutBytes((long)rx, (long)tx);
-                worker.ReportProgress(0, stats);
-            }
-        };
-
-        worker.ProgressChanged += (s, e) =>
-        {
-            if (!(e.UserState is InOutBytes stats)) return;
-
-            OnBytesInOutCountChanged(stats);
-
-        };
-
-        return worker;
-    }
-
-    //private void OnWireSockLogMessage(WireSockManager.LogMessage logMessage)
-    //{
-
-    //}
-
 
     #region Methods
     public override async Task StartAsync(VPNConnectionInfo connectionInfo)
@@ -221,37 +83,19 @@ public class WireguardVPN : BaseVPN
 
         File.WriteAllText(ConfigPath, connectionInfo.ConfigContent);
 
-        //try
-        //{
-        //    if (_wiresock.Connect(ConfigPath))
-        //    {
-        //        VpnState = VpnState.Connected;
-        //        if (!_tunnelConnectionWorker.IsBusy)
-        //            _tunnelConnectionWorker.RunWorkerAsync();
-        //    }
-        //}
-        //catch (Exception ex)
-        //{
-        //    VpnState = VpnState.Failed;
-        //}
-
         GetServerInfoAsync(connectionInfo);
 
         Task.Run(() => Service.Add(connectionInfo, ConfigPath, true)).ContinueWith(x =>
         {
-            OnWireguardHandler(connectionInfo.IsUseKillSwitch);
-            //try
-            //{
-            //    if (!_tunnelConnectionWorker.IsBusy)
-            //        _tunnelConnectionWorker.RunWorkerAsync();
-            //}
-            //catch (Exception ex)
-            //{
-            //    VpnState = VpnState.Failed;
-            //}
+            if (x.Result)
+            {
+                OnWireguardHandler(connectionInfo.IsUseKillSwitch);
+            }
+            else
+            {
+                VpnState = VpnState.Failed;
+            }
         });
-
-        //Task.Run(() => OnWireguardHandler(connectionInfo.IsUseKillSwitch));
     }
 
     private async Task GetServerInfoAsync(VPNConnectionInfo connectionInfo)
@@ -403,15 +247,6 @@ public class WireguardVPN : BaseVPN
         {
 
         }
-
-        //try
-        //{
-        //    _tunnelStateWorker.CancelAsync();
-        //}
-        //catch (Exception ex)
-        //{
-
-        //}
 
         try
         {
