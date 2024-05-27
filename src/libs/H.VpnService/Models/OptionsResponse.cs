@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using H.Vpn;
+using Newtonsoft.Json;
 
 namespace H.VpnService.Models
 {
@@ -18,5 +19,8 @@ namespace H.VpnService.Models
 
         [JsonProperty("allowLAN", Required = Required.Always)]
         public bool AllowLan { get; set; }
+
+        [JsonProperty("vpnStatus", Required = Required.Always)]
+        public VpnStatus Status { get; set; }
     }
 }

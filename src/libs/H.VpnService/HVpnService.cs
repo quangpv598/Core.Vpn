@@ -150,7 +150,8 @@ namespace H.VpnService
                     await IpcServer.SendOptionsAsync(
                         method.Id,
                         Vpn.FirewallSettings.AllowLan,
-                        Vpn.FirewallSettings.EnableKillSwitch).ConfigureAwait(false);
+                        Vpn.FirewallSettings.EnableKillSwitch,
+                        Vpn.Status.Status).ConfigureAwait(false);
                 }
                 catch (Exception exception)
                 {

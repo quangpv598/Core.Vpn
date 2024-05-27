@@ -4,6 +4,7 @@ using H.Pipes.AccessControl;
 using Newtonsoft.Json;
 using H.VpnService.Models;
 using System.Diagnostics;
+using H.Vpn;
 
 #pragma warning disable CS8604 // Possible null reference argument.
 
@@ -216,7 +217,8 @@ public class IpcServer : IAsyncDisposable
     public async Task SendOptionsAsync(
         int id, 
         bool allowLan, 
-        bool isKillSwitchEnabled, 
+        bool isKillSwitchEnabled,
+        VpnStatus vpnStatus,
         CancellationToken cancellationToken = default)
     {
         await WriteAsync(new OptionsResponse
@@ -224,6 +226,7 @@ public class IpcServer : IAsyncDisposable
             Id = id,
             AllowLan = allowLan,
             IsKillSwitchEnabled = isKillSwitchEnabled,
+            Status = vpnStatus,
         }, cancellationToken).ConfigureAwait(false);
     }
 
