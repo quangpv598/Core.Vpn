@@ -7,7 +7,12 @@
     <Nullable>enable</Nullable>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <Platforms>AnyCPU;x86;x64</Platforms>
+    <ApplicationIcon>logo.ico</ApplicationIcon>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="logo.ico" />
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\H.Firewall\H.Firewall.csproj" />

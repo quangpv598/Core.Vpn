@@ -31,45 +31,24 @@ internal class Program
         if (args.Length >= 2 && args[0] == "/config")
         {
             string configPath = args[1];
+            var dnsServers = new List<string>();
 
-            try
+            string dnsPattern = @"DNS\s*=\s*([\d.]+)";
+            MatchCollection matches = Regex.Matches(File.ReadAllText(configPath), dnsPattern);
+
+            foreach (Match match in matches)
             {
-                var dnsServers = new List<string>();
-
-                //string ipv4Pattern = @"^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$";
-
-                //foreach (string ip in new List<string>(args).Skip(3))
-                //{
-                //    if (Regex.IsMatch(ip, ipv4Pattern))
-                //    {
-                //        dnsServers.Add(ip);
-                //    }
-                //}
-
-                string dnsPattern = @"DNS\s*=\s*([\d.]+)";
-                MatchCollection matches = Regex.Matches(File.ReadAllText(configPath), dnsPattern);
-
-                foreach (Match match in matches)
-                {
-                    dnsServers.Add(match.Groups[1].Value);
-                }
-
-                _firewall.Start();
-                _firewall.RunTransaction((handle) =>
-                {
-                    var (providerKey, subLayerKey) = handle.RegisterKeys();
-                    handle.PermitDns(providerKey, subLayerKey, 11, 10, dnsServers.ToArray());
-                });
-
-
-                File.WriteAllText("C:\\c.txt", string.Join(',', args));
-
-                Run(configPath);
+                dnsServers.Add(match.Groups[1].Value);
             }
-            catch (Exception ex)
+
+            _firewall.Start();
+            _firewall.RunTransaction((handle) =>
             {
-                File.WriteAllText("C:\\b.txt", ex.ToString());
-            }
+                var (providerKey, subLayerKey) = handle.RegisterKeys();
+                handle.PermitDns(providerKey, subLayerKey, 11, 10, dnsServers.ToArray());
+            });
+
+            Run(configPath);
 
         }
     }
