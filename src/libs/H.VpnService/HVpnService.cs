@@ -1,5 +1,6 @@
 ﻿using System.Runtime.Versioning;
 using H.Firewall;
+using H.OpenVpn.Wireguard.Tunnel;
 using H.Vpn;
 using H.VpnService.Models;
 
@@ -73,6 +74,15 @@ namespace H.VpnService
 
         public async Task StartAsync(CancellationToken cancellationToken = default)
         {
+            try
+            {
+                Service.Remove("SolarVPN Wireguard Service", false);
+            }
+            catch (Exception exception)
+            {
+
+            }
+
             OnLogReceived("Starting...");
 
             IpcServer.ExceptionOccurred += (_, exception) => OnExceptionOccurred(exception);
